@@ -1,6 +1,7 @@
 // IMPORTS
 
 #include <GL/glut.h>
+#include <stdio.h>
 
 // CONSTANTS
 
@@ -49,6 +50,40 @@ Coordinates mouseCoordinates(0, 0, 0);
 
 // CAMERA & LIGHTS
 
+void setupCamera() {
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    gluPerspective(45.0f, 300 / 300, 0.1f, 300.0f);
+
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+
+    printf("Camera -> (%f, %f, %f)\n", observerCoordinates.x, observerCoordinates.y, observerCoordinates.z);
+
+    gluLookAt(observerCoordinates.x, observerCoordinates.y, observerCoordinates.z,
+              observedCoordinates.x,observedCoordinates.y , observedCoordinates.z,
+              0, 1, 0);
+}
+
+void setupLights() {
+    GLfloat ambient[] = { 0.7f, 0.7f, 0.7, 1.0f };
+    GLfloat diffuse[] = { 0.6f, 0.6f, 0.6, 1.0f };
+    GLfloat specular[] = { 1.0f, 1.0f, 1.0, 1.0f };
+    GLfloat shininess[] = { 50 };
+
+    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, ambient);
+    glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse);
+    glMaterialfv(GL_FRONT, GL_SPECULAR, specular);
+    glMaterialfv(GL_FRONT, GL_SHININESS, shininess);
+
+    GLfloat lightIntensity[] = { 0.7f, 0.7f, 1, 1.0f };
+    GLfloat lightPosition[] = { 0.0f, 0.0f, 5.0f, 0.0f };
+    glLightfv(GL_LIGHT0, GL_POSITION, lightIntensity);
+    glLightfv(GL_LIGHT0, GL_DIFFUSE, lightIntensity);
+}
+
 // HANDLERS
 
 void mouseHandler(int x, int y) {
@@ -69,7 +104,8 @@ void specialKeyboardHandler(int k, int x, int y) {
 // DISPLAY & ANIMATION
 
 void display() {
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  setupLights();
+  setupCamera();
   glFlush();
 }
 
@@ -80,16 +116,22 @@ void animation() {
 // MAIN
 
 int main(int argc, char** argv) {
-    glutInit(&argc, argv);
-    glutInitWindowSize(WINDOW_WIDTH, WINDOW_HEIGHT);
-    glutInitWindowPosition(WINDOW_POSITION_X, WINDOW_POSITION_Y);
-    glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB | GLUT_DEPTH);
-    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-    glutCreateWindow("Game");
-    glutDisplayFunc(display);
-    glutIdleFunc(animation);
-    glutPassiveMotionFunc(mouseHandler);
-    glutKeyboardFunc(keyboardHandler);
-    glutSpecialFunc(specialKeyboardHandler);
-    glutMainLoop();
+  glutInit(&argc, argv);
+  glutInitWindowSize(WINDOW_WIDTH, WINDOW_HEIGHT);
+  glutInitWindowPosition(WINDOW_POSITION_X, WINDOW_POSITION_Y);
+  glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB | GLUT_DEPTH);
+  glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+  glutCreateWindow("Game");
+  glutDisplayFunc(display);
+  glutIdleFunc(animation);
+  glutPassiveMotionFunc(mouseHandler);
+  glutKeyboardFunc(keyboardHandler);
+  glutSpecialFunc(specialKeyboardHandler);
+  glEnable(GL_DEPTH_TEST);
+  glEnable(GL_LIGHTING);
+  glEnable(GL_LIGHT0);
+  glEnable(GL_NORMALIZE);
+  glEnable(GL_COLOR_MATERIAL);
+  glShadeModel(GL_SMOOTH);
+  glutMainLoop();
 }
