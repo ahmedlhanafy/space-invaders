@@ -68,8 +68,8 @@ void setupCamera() {
 }
 
 void setupLights() {
-    GLfloat ambient[] = { 0.7f, 0.7f, 0.7, 1.0f };
-    GLfloat diffuse[] = { 0.6f, 0.6f, 0.6, 1.0f };
+    GLfloat ambient[] = { 0.7f, 1.0f, 0.7, 1.0f };
+    GLfloat diffuse[] = { 1.0f, 0.6f, 0.6, 1.0f };
     GLfloat specular[] = { 1.0f, 1.0f, 1.0, 1.0f };
     GLfloat shininess[] = { 50 };
 
@@ -79,9 +79,11 @@ void setupLights() {
     glMaterialfv(GL_FRONT, GL_SHININESS, shininess);
 
     GLfloat lightIntensity[] = { 0.7f, 0.7f, 1, 1.0f };
-    GLfloat lightPosition[] = { 0.0f, 0.0f, 5.0f, 0.0f };
+    GLfloat lightPosition[] = { 3.0f, 8.0f, 15.0f, 0.0f };
+    GLfloat lightDirection[] = { 0.0f, 0.0f, -1.0f, 0.0f };
     glLightfv(GL_LIGHT0, GL_POSITION, lightIntensity);
     glLightfv(GL_LIGHT0, GL_DIFFUSE, lightIntensity);
+    glLightfv(GL_LIGHT0, GL_SPOT_DIRECTION, lightDirection);
 }
 
 // HANDLERS
@@ -94,6 +96,19 @@ void mouseHandler(int x, int y) {
 }
 
 void keyboardHandler(unsigned char k, int x, int y) {
+    if(k == 'w')
+        observerCoordinates.z--;
+    if(k == 's')
+        observerCoordinates.z++;
+    if(k == 'r')
+        observerCoordinates.y++;
+    if(k == 'f')
+        observerCoordinates.y--;
+    if(k == 'a')
+        observerCoordinates.x--;
+    if(k == 'd')
+        observerCoordinates.x++;
+
     glutPostRedisplay();
 }
 
@@ -104,8 +119,13 @@ void specialKeyboardHandler(int k, int x, int y) {
 // DISPLAY & ANIMATION
 
 void display() {
-  setupLights();
+  // setupLights();
   setupCamera();
+
+  glPushMatrix();
+  glutSolidCube(5);
+  glPopMatrix();
+
   glFlush();
 }
 
@@ -119,19 +139,20 @@ int main(int argc, char** argv) {
   glutInit(&argc, argv);
   glutInitWindowSize(WINDOW_WIDTH, WINDOW_HEIGHT);
   glutInitWindowPosition(WINDOW_POSITION_X, WINDOW_POSITION_Y);
-  glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB | GLUT_DEPTH);
-  glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
   glutCreateWindow("Game");
   glutDisplayFunc(display);
   glutIdleFunc(animation);
   glutPassiveMotionFunc(mouseHandler);
   glutKeyboardFunc(keyboardHandler);
   glutSpecialFunc(specialKeyboardHandler);
+  glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB | GLUT_DEPTH);
+  glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
   glEnable(GL_DEPTH_TEST);
   glEnable(GL_LIGHTING);
   glEnable(GL_LIGHT0);
   glEnable(GL_NORMALIZE);
   glEnable(GL_COLOR_MATERIAL);
   glShadeModel(GL_SMOOTH);
+  glutFullScreen();
   glutMainLoop();
 }
