@@ -37,6 +37,8 @@ Coordinates mouseCoordinates(0, 0, 0);
 Spaceship player(0, 0, 2.5, 0, 0, 0, 0);
 Spaceship opponent(0, 0, -3, 0, 0, 0, 0);
 
+Coordinates spotlights(0,0,0);
+
 // CAMERA & LIGHTS
 
 void setupCamera() {
@@ -56,12 +58,12 @@ void setupCamera() {
             0, 1, 0);
 }
 
-void setupLights() {
+void setupLights(float playerx, float playery, float playerz) {
  GLfloat lmodel_ambient[] = { 0.1f, 0.1f, 0.1f, 1.0f };
 	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, lmodel_ambient); // fv -->float vector 
 	
 	GLfloat l0Diffuse[] = { 1.0, 1.0f, 1.0f, 1.0f };
-	GLfloat l0Position[] = { 5.f, 1.0f, 3.0f, 1 };
+	GLfloat l0Position[] = { playerx - 0.45, playery + 0.45, playerz - 0.45, 1 };
 	GLfloat l0Direction[] = { 0.0, 0.0, -1.0 };
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, l0Diffuse);
 	glLightfv(GL_LIGHT0, GL_POSITION, l0Position);
@@ -70,7 +72,7 @@ void setupLights() {
 	glLightfv(GL_LIGHT0, GL_SPOT_DIRECTION, l0Direction);
 
 	GLfloat l1Diffuse[] = { 1.0f, 1.0f, 1.0f, 1.0f };
-	GLfloat l1Position[] = { 2.0f, 1.0f, 3.0f, 1};//s homogeneous bit (sunlight 0 vs. spotlight 1 ) differene in ambient (fading/ non fading)
+	GLfloat l1Position[] = { playerx + 0.45, playery + 0.45, playerz - 0.45, 1};//s homogeneous bit (sunlight 0 vs. spotlight 1 ) differene in ambient (fading/ non fading)
 	GLfloat l1Direction[] = { 0.0, 0.0, -1.0 };	
 	glLightfv(GL_LIGHT1, GL_DIFFUSE, l1Diffuse);
 	glLightfv(GL_LIGHT1, GL_POSITION, l1Position);// vector
@@ -143,9 +145,9 @@ void transformOpponent(Spaceship &spaceship) {
   srand(time(NULL));
 
   if(rand() % 2 == 0)
-    spaceship.coordinates->x += 0.01;
+    spaceship.coordinates->x += 0.001;
   else
-    spaceship.coordinates->x -= 0.01;
+    spaceship.coordinates->x -= 0.001;
 
   if(spaceship.coordinates->x > 3.5)
     spaceship.coordinates->x -= 7;
@@ -156,7 +158,7 @@ void transformOpponent(Spaceship &spaceship) {
 // DISPLAY & ANIMATION
 
 void display() {
-  setupLights();
+  setupLights(player.coordinates->x, player.coordinates->y, player.coordinates->z);
   setupCamera();
 
   drawPlayer(0.7, player);
