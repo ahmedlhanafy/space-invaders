@@ -3,11 +3,15 @@
 #include <GL/glut.h>
 #include <stdio.h>
 #include <time.h>
+#include <vector>
 #include "Coordinates.h"
 #include "Rotation.h"
 #include "Spaceship.h"
 
+using namespace std;
+
 void drawPlayer(float length, Spaceship &spaceship);
+void drawBullet(Coordinates &coordinates);
 void specialKeyboardUpHandler(int k, int x, int y);
 // CONSTANTS
 
@@ -21,11 +25,12 @@ int WINDOW_HEIGHT = 700;
 int WINDOW_POSITION_X = 150;
 int WINDOW_POSITION_Y = 150;
 
-
 // VARIABLE CONFIGURATIONS
 
-Coordinates observerCoordinates(0, 3, 5);
+vector<Coordinates> playerBullets;
+
 Coordinates observedCoordinates(0, 0, 0);
+Coordinates observerCoordinates(0, 3, 5);
 Coordinates mouseCoordinates(0, 0, 0);
 
 Spaceship player(0, 0, 2.5, 0, 0, 0, 0);
@@ -93,7 +98,11 @@ void keyboardHandler(unsigned char k, int x, int y) {
       observerCoordinates.x--;
   if(k == 'd')
       observerCoordinates.x++;
-
+  if(k == 32){
+    Coordinates newCoordinates(player.coordinates->x, player.coordinates->y, player.coordinates->z);
+    playerBullets.push_back(newCoordinates);
+  }
+  
   glutPostRedisplay();
 }
 
@@ -148,11 +157,20 @@ void display() {
 
   drawOpponent(0.7, opponent);
 
+  for(Coordinates &coordinates : playerBullets){
+    drawBullet(coordinates);
+  }
+  
   glFlush();
 }
 
 void animation() {
   transformOpponent(opponent);
+
+  for(Coordinates &coordinates : playerBullets){
+    coordinates.z -= 0.1;
+  }
+
   glutPostRedisplay();
 }
 
@@ -161,6 +179,13 @@ void drawPlayer(float length, Spaceship &spaceship){
   glTranslated(spaceship.coordinates->x, spaceship.coordinates->y, spaceship.coordinates->z);
   glRotated(spaceship.rotation->angle, 0,0,-1);
   glutSolidCube(length);
+  glPopMatrix();
+}
+
+void drawBullet(Coordinates &coordinates) {
+  glPushMatrix();
+  glTranslated(coordinates.x, coordinates.y, coordinates.z);
+  glutSolidCube(0.2);
   glPopMatrix();
 }
 
