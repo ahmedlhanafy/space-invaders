@@ -1,3 +1,3 @@
-rm -f $1
-g++ -std=c++11 -o $1 $1.cpp -lglut -lGLU -lGL -lm
-./$1
+rm -f main
+g++ -std=c++11 -o main main.cpp -lglut -lGLU -lGL -lm
+./main
