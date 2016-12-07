@@ -6,6 +6,8 @@
 #include "Rotation.h"
 #include "Spaceship.h"
 
+void drawPlayer(float length, Spaceship &spaceship);
+void specialKeyboardUpHandler(int k, int x, int y);
 // CONSTANTS
 
 #define PI 3.14159265
@@ -17,6 +19,7 @@ int WINDOW_HEIGHT = 700;
 
 int WINDOW_POSITION_X = 150;
 int WINDOW_POSITION_Y = 150;
+
 
 // VARIABLE CONFIGURATIONS
 
@@ -39,7 +42,7 @@ void setupCamera() {
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
 
-  printf("Camera -> (%f, %f, %f)\n", observerCoordinates.x, observerCoordinates.y, observerCoordinates.z);
+  // printf("Camera -> (%f, %f, %f)\n", observerCoordinates.x, observerCoordinates.y, observerCoordinates.z);
 
   gluLookAt(observerCoordinates.x, observerCoordinates.y, observerCoordinates.z,
             observedCoordinates.x,observedCoordinates.y , observedCoordinates.z,
@@ -94,13 +97,25 @@ void keyboardHandler(unsigned char k, int x, int y) {
 }
 
 void specialKeyboardHandler(int k, int x, int y) {
-  if(k == GLUT_KEY_RIGHT)
+  if(k == GLUT_KEY_RIGHT){
     player.coordinates->x += 0.1;
-  if(k == GLUT_KEY_LEFT)
+    player.rotation->angle += 15;
+  }
+  if(k == GLUT_KEY_LEFT){
     player.coordinates->x -= 0.1;
-
-  glutPostRedisplay();
+    player.rotation->angle -= 15;
+  }
 }
+
+void specialKeyboardUpHandler(int k, int x, int y){
+  if(k == GLUT_KEY_RIGHT){
+    player.rotation->angle = 0;    
+  } 
+  if(k == GLUT_KEY_LEFT){
+    player.rotation->angle = 0;        
+  } 
+}
+
 
 // DISPLAY & ANIMATION
 
@@ -108,10 +123,7 @@ void display() {
   // setupLights();
   setupCamera();
 
-  glPushMatrix();
-  glTranslated(player.coordinates->x, player.coordinates->y, player.coordinates->z);
-  glutSolidCube(0.7);
-  glPopMatrix();
+  drawPlayer(0.7, player);
 
   glPushMatrix();
   glTranslated(opponent.coordinates->x, opponent.coordinates->y, opponent.coordinates->z);
@@ -125,6 +137,14 @@ void animation() {
   glutPostRedisplay();
 }
 
+void drawPlayer(float length, Spaceship &spaceship){
+  glPushMatrix();
+  glTranslated(spaceship.coordinates->x, spaceship.coordinates->y, spaceship.coordinates->z);
+  glRotated(spaceship.rotation->angle, 0,0,-1);
+  glutSolidCube(length);
+  glPopMatrix();
+}
+
 // MAIN
 
 int main(int argc, char** argv) {
@@ -136,7 +156,8 @@ int main(int argc, char** argv) {
   glutIdleFunc(animation);
   glutPassiveMotionFunc(mouseHandler);
   glutKeyboardFunc(keyboardHandler);
-  glutSpecialFunc(specialKeyboardHandler);
+  glutSpecialFunc(specialKeyboardHandler); 
+  glutSpecialUpFunc(specialKeyboardUpHandler);
   glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB | GLUT_DEPTH);
   glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
   glEnable(GL_DEPTH_TEST);
