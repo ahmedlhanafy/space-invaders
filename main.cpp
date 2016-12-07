@@ -102,6 +102,7 @@ void keyboardHandler(unsigned char k, int x, int y) {
     Coordinates newCoordinates(player.coordinates->x, player.coordinates->y, player.coordinates->z);
     playerBullets.push_back(newCoordinates);
   }
+  
   glutPostRedisplay();
 }
 
@@ -156,28 +157,15 @@ void display() {
 
   drawOpponent(0.7, opponent);
 
-  // for(unsigned int i = 0; i < sizeof(playerBullets) / sizeof(playerBullets[0]); i++){
-  //   drawBullet(playerBullets[i]);
-  // }
-
   for(Coordinates &coordinates : playerBullets){
     drawBullet(coordinates);
   }
   
-  // if(bulletFired){
-  //   drawBullet(player);
-  // } else {
-  //   bulletCoordinates.z = player.coordinates->z;
-  // }
   glFlush();
 }
 
 void animation() {
   transformOpponent(opponent);
-  
-  // for(unsigned int i = 0; i < sizeof(playerBullets) / sizeof(playerBullets[0]); i++){
-  //   playerBullets[i].z -= 0.1;
-  // }
 
   for(Coordinates &coordinates : playerBullets){
     coordinates.z -= 0.1;
