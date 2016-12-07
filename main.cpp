@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <time.h>
 #include <vector>
-#include <glut.h>
+#include <GL/glut.h>
 #include "Coordinates.h"
 #include "Rotation.h"
 #include "Spaceship.h"
