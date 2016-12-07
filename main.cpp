@@ -2,6 +2,7 @@
 
 #include <GL/glut.h>
 #include <stdio.h>
+#include <time.h>
 #include "Coordinates.h"
 #include "Rotation.h"
 #include "Spaceship.h"
@@ -109,13 +110,33 @@ void specialKeyboardHandler(int k, int x, int y) {
 
 void specialKeyboardUpHandler(int k, int x, int y){
   if(k == GLUT_KEY_RIGHT){
-    player.rotation->angle = 0;    
-  } 
+    player.rotation->angle = 0;
+  }
   if(k == GLUT_KEY_LEFT){
-    player.rotation->angle = 0;        
-  } 
+    player.rotation->angle = 0;
+  }
 }
 
+void drawOpponent(float length, Spaceship &spaceship) {
+  glPushMatrix();
+  glTranslated(spaceship.coordinates->x, spaceship.coordinates->y, spaceship.coordinates->z);
+  glutSolidCube(length);
+  glPopMatrix();
+}
+
+void transformOpponent(Spaceship &spaceship) {
+  srand(time(NULL));
+
+  if(rand() % 2 == 0)
+    spaceship.coordinates->x += 0.01;
+  else
+    spaceship.coordinates->x -= 0.01;
+
+  if(spaceship.coordinates->x > 3.5)
+    spaceship.coordinates->x -= 7;
+  if(spaceship.coordinates->x < -3.5)
+    spaceship.coordinates->x += 7;
+}
 
 // DISPLAY & ANIMATION
 
@@ -125,15 +146,13 @@ void display() {
 
   drawPlayer(0.7, player);
 
-  glPushMatrix();
-  glTranslated(opponent.coordinates->x, opponent.coordinates->y, opponent.coordinates->z);
-  glutSolidCube(0.4);
-  glPopMatrix();
+  drawOpponent(0.7, opponent);
 
   glFlush();
 }
 
 void animation() {
+  transformOpponent(opponent);
   glutPostRedisplay();
 }
 
@@ -156,7 +175,7 @@ int main(int argc, char** argv) {
   glutIdleFunc(animation);
   glutPassiveMotionFunc(mouseHandler);
   glutKeyboardFunc(keyboardHandler);
-  glutSpecialFunc(specialKeyboardHandler); 
+  glutSpecialFunc(specialKeyboardHandler);
   glutSpecialUpFunc(specialKeyboardUpHandler);
   glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB | GLUT_DEPTH);
   glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
