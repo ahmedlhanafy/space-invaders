@@ -103,25 +103,25 @@ void specialKeyboardHandler(int k, int x, int y) {
   glutPostRedisplay();
 }
 
-void drawOpponent(float length) {
+void drawOpponent(float length, Spaceship &spaceship) {
   glPushMatrix();
-  glTranslated(opponent.coordinates->x, opponent.coordinates->y, opponent.coordinates->z);
+  glTranslated(spaceship.coordinates->x, spaceship.coordinates->y, spaceship.coordinates->z);
   glutSolidCube(length);
   glPopMatrix();
 }
 
-void transformOpponent() {
+void transformOpponent(Spaceship &spaceship) {
   srand(time(NULL));
 
   if(rand() % 2 == 0)
-    opponent.coordinates->x += 0.01;
+    spaceship.coordinates->x += 0.01;
   else
-    opponent.coordinates->x -= 0.01;
+    spaceship.coordinates->x -= 0.01;
 
-  if(opponent.coordinates->x > 3.5)
-    opponent.coordinates->x -= 7;
-  if(opponent.coordinates->x < -3.5)
-    opponent.coordinates->x += 7;
+  if(spaceship.coordinates->x > 3.5)
+    spaceship.coordinates->x -= 7;
+  if(spaceship.coordinates->x < -3.5)
+    spaceship.coordinates->x += 7;
 }
 
 // DISPLAY & ANIMATION
@@ -135,13 +135,13 @@ void display() {
   glutSolidCube(0.7);
   glPopMatrix();
 
-  drawOpponent(0.7);
+  drawOpponent(0.7, opponent);
 
   glFlush();
 }
 
 void animation() {
-  transformOpponent();
+  transformOpponent(opponent);
   glutPostRedisplay();
 }
 
