@@ -29,6 +29,7 @@ int WINDOW_POSITION_Y = 150;
 // VARIABLE CONFIGURATIONS
 
 vector<Coordinates> playerBullets;
+vector<Coordinates> opponentBullets;
 
 Coordinates observedCoordinates(0, 0, 0);
 Coordinates observerCoordinates(0, 3, 5);
@@ -38,6 +39,7 @@ Spaceship player(0, 0, 2.5, 0, 0, 0, 0);
 Spaceship opponent(0, 0, -3, 0, 0, 0, 0);
 
 Coordinates spotlights(0,0,0);
+unsigned long int opponentBulletCounter = 0;
 
 // CAMERA & LIGHTS
 
@@ -160,19 +162,15 @@ void transformOpponent(Spaceship &spaceship) {
 void display() {
   setupLights(player.coordinates->x, player.coordinates->y, player.coordinates->z);
   setupCamera();
-
   drawPlayer(0.7, player);
-
   drawOpponent(0.7, opponent);
-
-  //for(Coordinates &coordinates : playerBullets){
-  //  drawBullet(coordinates);
-  //}
-
+  
   for (unsigned char i = 0; i < playerBullets.size(); i++){
     drawBullet(playerBullets[i]);
   }
-	
+	for (unsigned char i = 0; i < opponentBullets.size(); i++){
+    drawBullet(opponentBullets[i]);
+  }
   
   glFlush();
 }
@@ -180,13 +178,20 @@ void display() {
 void animation() {
   transformOpponent(opponent);
 
-  //for(Coordinates &coordinates : playerBullets){
-  //  coordinates.z -= 0.1;
-  //}
+  for (unsigned char i = 0; i < playerBullets.size(); i++){
+    // TODO: remove out-of-bounds bullet objects
+    playerBullets[i].z -= 0.1;
+  }
 
-    for (unsigned char i = 0; i < playerBullets.size(); i++){
-    //drawBullet(playerBullets[i]);
-	playerBullets[i].z -= 0.1;
+  for (unsigned char i = 0; i < opponentBullets.size(); i++){
+    // TODO: remove out-of-bounds bullet objects
+    opponentBullets[i].z += 0.05;
+  }
+
+  if(opponentBulletCounter++ == 200){
+    Coordinates newCoordinates(opponent.coordinates->x, opponent.coordinates->y, opponent.coordinates->z);
+    opponentBullets.push_back(newCoordinates);
+    opponentBulletCounter = 0;
   }
 
   glutPostRedisplay();
