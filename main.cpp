@@ -210,6 +210,6 @@ int main(int argc, char** argv) {
   glEnable(GL_NORMALIZE);
   glEnable(GL_COLOR_MATERIAL);
   glShadeModel(GL_SMOOTH);
-  // glutFullScreen();
+  glutFullScreen();
   glutMainLoop();
 }
