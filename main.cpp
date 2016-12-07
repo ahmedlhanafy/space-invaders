@@ -2,6 +2,7 @@
 
 #include <GL/glut.h>
 #include <stdio.h>
+#include <time.h>
 #include "Coordinates.h"
 #include "Rotation.h"
 #include "Spaceship.h"
@@ -102,6 +103,27 @@ void specialKeyboardHandler(int k, int x, int y) {
   glutPostRedisplay();
 }
 
+void drawOpponent(float length) {
+  glPushMatrix();
+  glTranslated(opponent.coordinates->x, opponent.coordinates->y, opponent.coordinates->z);
+  glutSolidCube(length);
+  glPopMatrix();
+}
+
+void transformOpponent() {
+  srand(time(NULL));
+
+  if(rand() % 2 == 0)
+    opponent.coordinates->x += 0.01;
+  else
+    opponent.coordinates->x -= 0.01;
+
+  if(opponent.coordinates->x > 3.5)
+    opponent.coordinates->x -= 7;
+  if(opponent.coordinates->x < -3.5)
+    opponent.coordinates->x += 7;
+}
+
 // DISPLAY & ANIMATION
 
 void display() {
@@ -113,15 +135,13 @@ void display() {
   glutSolidCube(0.7);
   glPopMatrix();
 
-  glPushMatrix();
-  glTranslated(opponent.coordinates->x, opponent.coordinates->y, opponent.coordinates->z);
-  glutSolidCube(0.4);
-  glPopMatrix();
+  drawOpponent(0.7);
 
   glFlush();
 }
 
 void animation() {
+  transformOpponent();
   glutPostRedisplay();
 }
 
