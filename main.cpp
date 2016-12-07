@@ -1,9 +1,10 @@
 // IMPORTS
 
-#include <GL/glut.h>
+
 #include <stdio.h>
 #include <time.h>
 #include <vector>
+#include <glut.h>
 #include "Coordinates.h"
 #include "Rotation.h"
 #include "Spaceship.h"
@@ -162,9 +163,14 @@ void display() {
 
   drawOpponent(0.7, opponent);
 
-  for(Coordinates &coordinates : playerBullets){
-    drawBullet(coordinates);
+  //for(Coordinates &coordinates : playerBullets){
+  //  drawBullet(coordinates);
+  //}
+
+  for (unsigned char i = 0; i < playerBullets.size(); i++){
+    drawBullet(playerBullets[i]);
   }
+	
   
   glFlush();
 }
@@ -172,8 +178,13 @@ void display() {
 void animation() {
   transformOpponent(opponent);
 
-  for(Coordinates &coordinates : playerBullets){
-    coordinates.z -= 0.1;
+  //for(Coordinates &coordinates : playerBullets){
+  //  coordinates.z -= 0.1;
+  //}
+
+    for (unsigned char i = 0; i < playerBullets.size(); i++){
+    //drawBullet(playerBullets[i]);
+	playerBullets[i].z -= 0.1;
   }
 
   glutPostRedisplay();
