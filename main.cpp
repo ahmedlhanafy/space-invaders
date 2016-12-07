@@ -47,22 +47,27 @@ void setupCamera() {
 }
 
 void setupLights() {
-  GLfloat ambient[] = { 0.7f, 1.0f, 0.7, 1.0f };
-  GLfloat diffuse[] = { 1.0f, 0.6f, 0.6, 1.0f };
-  GLfloat specular[] = { 1.0f, 1.0f, 1.0, 1.0f };
-  GLfloat shininess[] = { 50 };
+ GLfloat lmodel_ambient[] = { 0.1f, 0.1f, 0.1f, 1.0f };
+	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, lmodel_ambient); // fv -->float vector 
+	
+	GLfloat l0Diffuse[] = { 1.0, 1.0f, 1.0f, 1.0f };
+	GLfloat l0Position[] = { 5.f, 1.0f, 3.0f, 1 };
+	GLfloat l0Direction[] = { 0.0, 0.0, -1.0 };
+	glLightfv(GL_LIGHT0, GL_DIFFUSE, l0Diffuse);
+	glLightfv(GL_LIGHT0, GL_POSITION, l0Position);
+	glLightf(GL_LIGHT0, GL_SPOT_CUTOFF, 20.0);
+	glLightf(GL_LIGHT0, GL_SPOT_EXPONENT, 2.0);
+	glLightfv(GL_LIGHT0, GL_SPOT_DIRECTION, l0Direction);
 
-  glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, ambient);
-  glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse);
-  glMaterialfv(GL_FRONT, GL_SPECULAR, specular);
-  glMaterialfv(GL_FRONT, GL_SHININESS, shininess);
+	GLfloat l1Diffuse[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+	GLfloat l1Position[] = { 2.0f, 1.0f, 3.0f, 1};//s homogeneous bit (sunlight 0 vs. spotlight 1 ) differene in ambient (fading/ non fading)
+	GLfloat l1Direction[] = { 0.0, 0.0, -1.0 };	
+	glLightfv(GL_LIGHT1, GL_DIFFUSE, l1Diffuse);
+	glLightfv(GL_LIGHT1, GL_POSITION, l1Position);// vector
+	glLightf(GL_LIGHT1, GL_SPOT_CUTOFF, 20.0);// number in (angle)
+	glLightf(GL_LIGHT1, GL_SPOT_EXPONENT, 2.0);
+	glLightfv(GL_LIGHT1, GL_SPOT_DIRECTION, l1Direction);
 
-  GLfloat lightIntensity[] = { 0.7f, 0.7f, 1, 1.0f };
-  GLfloat lightPosition[] = { 3.0f, 8.0f, 15.0f, 0.0f };
-  GLfloat lightDirection[] = { 0.0f, 0.0f, -1.0f, 0.0f };
-  glLightfv(GL_LIGHT0, GL_POSITION, lightIntensity);
-  glLightfv(GL_LIGHT0, GL_DIFFUSE, lightIntensity);
-  glLightfv(GL_LIGHT0, GL_SPOT_DIRECTION, lightDirection);
 }
 
 // HANDLERS
@@ -105,7 +110,7 @@ void specialKeyboardHandler(int k, int x, int y) {
 // DISPLAY & ANIMATION
 
 void display() {
-  // setupLights();
+  setupLights();
   setupCamera();
 
   glPushMatrix();
@@ -142,6 +147,7 @@ int main(int argc, char** argv) {
   glEnable(GL_DEPTH_TEST);
   glEnable(GL_LIGHTING);
   glEnable(GL_LIGHT0);
+  glEnable(GL_LIGHT1);
   glEnable(GL_NORMALIZE);
   glEnable(GL_COLOR_MATERIAL);
   glShadeModel(GL_SMOOTH);
