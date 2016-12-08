@@ -156,6 +156,12 @@ void drawBullet(Coordinates &coordinates) {
   glPopMatrix();
 }
 
+void drawSpaceshipBullets(Spaceship &spaceship) {
+  for (unsigned char i = 0; i < spaceship.bullets.size(); i++) {
+    drawBullet(spaceship.bullets[i]);
+  }
+}
+
 // TRANSFORMATIONS
 
 void transformOpponent(Spaceship &spaceship) {
@@ -197,15 +203,12 @@ void transformOpponentBullets() {
 void display() {
   setupLights(player.coordinates->x, player.coordinates->y, player.coordinates->z);
   setupCamera();
+
   drawSpaceship(0.7, player);
   drawSpaceship(0.7, opponent);
 
-  for (unsigned char i = 0; i < player.bullets.size(); i++) {
-    drawBullet(player.bullets[i]);
-  }
-	for (unsigned char i = 0; i < opponent.bullets.size(); i++) {
-    drawBullet(opponent.bullets[i]);
-  }
+  drawSpaceshipBullets(player);
+  drawSpaceshipBullets(opponent);
 
   glFlush();
 }
