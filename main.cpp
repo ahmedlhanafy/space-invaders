@@ -76,46 +76,6 @@ void animation() {
   glutPostRedisplay();
 }
 
-// CAMERA & LIGHTS
-
-void setupCamera() {
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-  glMatrixMode(GL_PROJECTION);
-  glLoadIdentity();
-  gluPerspective(45.0f, 300 / 300, 0.1f, 300.0f);
-
-  glMatrixMode(GL_MODELVIEW);
-  glLoadIdentity();
-
-  gluLookAt(observerCoordinates.x, observerCoordinates.y, observerCoordinates.z,
-            observedCoordinates.x,observedCoordinates.y , observedCoordinates.z,
-            0, 1, 0);
-}
-
-void setupLights(float playerx, float playery, float playerz) {
-  GLfloat lmodel_ambient[] = { 0.1f, 0.1f, 0.1f, 1.0f };
-	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, lmodel_ambient); // fv -->float vector
-
-	GLfloat l0Diffuse[] = { 1.0, 1.0f, 1.0f, 1.0f };
-	GLfloat l0Position[] = { playerx - 0.45, playery + 0.45, playerz - 0.45, 1 };
-	GLfloat l0Direction[] = { 0.0, 0.0, -1.0 };
-	glLightfv(GL_LIGHT0, GL_DIFFUSE, l0Diffuse);
-	glLightfv(GL_LIGHT0, GL_POSITION, l0Position);
-	glLightf(GL_LIGHT0, GL_SPOT_CUTOFF, 20.0);
-	glLightf(GL_LIGHT0, GL_SPOT_EXPONENT, 2.0);
-	glLightfv(GL_LIGHT0, GL_SPOT_DIRECTION, l0Direction);
-
-	GLfloat l1Diffuse[] = { 1.0f, 1.0f, 1.0f, 1.0f };
-	GLfloat l1Position[] = { playerx + 0.45, playery + 0.45, playerz - 0.45, 1};//s homogeneous bit (sunlight 0 vs. spotlight 1 ) differene in ambient (fading/ non fading)
-	GLfloat l1Direction[] = { 0.0, 0.0, -1.0 };
-	glLightfv(GL_LIGHT1, GL_DIFFUSE, l1Diffuse);
-	glLightfv(GL_LIGHT1, GL_POSITION, l1Position);// vector
-	glLightf(GL_LIGHT1, GL_SPOT_CUTOFF, 20.0);// number in (angle)
-	glLightf(GL_LIGHT1, GL_SPOT_EXPONENT, 2.0);
-	glLightfv(GL_LIGHT1, GL_SPOT_DIRECTION, l1Direction);
-}
-
 // HANDLERS
 
 void mouseHandler(int x, int y) {
@@ -218,6 +178,46 @@ void shootBlankOrLiveBullet(Spaceship &spaceship) {
     spaceship.bullets.push_back(Bullet(true, spaceship.coordinates->x, spaceship.coordinates->y, spaceship.coordinates->z));
     spaceship.firingDelay = 0;
   }
+}
+
+// CAMERA & LIGHTS
+
+void setupCamera() {
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+  glMatrixMode(GL_PROJECTION);
+  glLoadIdentity();
+  gluPerspective(45.0f, 300 / 300, 0.1f, 300.0f);
+
+  glMatrixMode(GL_MODELVIEW);
+  glLoadIdentity();
+
+  gluLookAt(observerCoordinates.x, observerCoordinates.y, observerCoordinates.z,
+            observedCoordinates.x,observedCoordinates.y , observedCoordinates.z,
+            0, 1, 0);
+}
+
+void setupLights(float playerx, float playery, float playerz) {
+  GLfloat lmodel_ambient[] = { 0.1f, 0.1f, 0.1f, 1.0f };
+	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, lmodel_ambient); // fv -->float vector
+
+	GLfloat l0Diffuse[] = { 1.0, 1.0f, 1.0f, 1.0f };
+	GLfloat l0Position[] = { playerx - 0.45, playery + 0.45, playerz - 0.45, 1 };
+	GLfloat l0Direction[] = { 0.0, 0.0, -1.0 };
+	glLightfv(GL_LIGHT0, GL_DIFFUSE, l0Diffuse);
+	glLightfv(GL_LIGHT0, GL_POSITION, l0Position);
+	glLightf(GL_LIGHT0, GL_SPOT_CUTOFF, 20.0);
+	glLightf(GL_LIGHT0, GL_SPOT_EXPONENT, 2.0);
+	glLightfv(GL_LIGHT0, GL_SPOT_DIRECTION, l0Direction);
+
+	GLfloat l1Diffuse[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+	GLfloat l1Position[] = { playerx + 0.45, playery + 0.45, playerz - 0.45, 1};//s homogeneous bit (sunlight 0 vs. spotlight 1 ) differene in ambient (fading/ non fading)
+	GLfloat l1Direction[] = { 0.0, 0.0, -1.0 };
+	glLightfv(GL_LIGHT1, GL_DIFFUSE, l1Diffuse);
+	glLightfv(GL_LIGHT1, GL_POSITION, l1Position);// vector
+	glLightf(GL_LIGHT1, GL_SPOT_CUTOFF, 20.0);// number in (angle)
+	glLightf(GL_LIGHT1, GL_SPOT_EXPONENT, 2.0);
+	glLightfv(GL_LIGHT1, GL_SPOT_DIRECTION, l1Direction);
 }
 
 // MAIN
