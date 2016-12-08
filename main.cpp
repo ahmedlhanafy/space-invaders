@@ -47,7 +47,6 @@ Spaceship player(0, 0, 2.5, 0, 0, 0, 0);
 Spaceship opponent(0, 0, -3, 0, 0, 0, 0);
 
 Coordinates spotlights(0, 0, 0);
-unsigned long int opponentBulletCounter = 0;
 
 // CAMERA & LIGHTS
 
@@ -194,10 +193,10 @@ void transformOpponentBullets() {
     opponent.bullets[i].z += 0.05;
   }
 
-  if(opponentBulletCounter++ == 200) {
+  if(opponent.firingDelay++ == 200) {
     Coordinates newCoordinates(opponent.coordinates->x, opponent.coordinates->y, opponent.coordinates->z);
     opponent.bullets.push_back(newCoordinates);
-    opponentBulletCounter = 0;
+    opponent.firingDelay = 0;
   }
 }
 
