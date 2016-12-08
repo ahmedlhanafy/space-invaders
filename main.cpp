@@ -8,6 +8,7 @@
 #include <glut.h>
 #include "Coordinates.h"
 #include "Rotation.h"
+#include "Bullet.h"
 #include "Spaceship.h"
 
 using namespace std;
@@ -18,18 +19,20 @@ using namespace std;
 
 // DEFINITIONS
 
+void display();
+void animation();
 void setupCamera();
 void setupLights(float playerx, float playery, float playerz);
 void mouseHandler(int x, int y);
 void keyboardHandler(unsigned char k, int x, int y);
 void specialKeyboardHandler(int k, int x, int y);
 void specialKeyboardUpHandler(int k, int x, int y);
-void drawPlayer(float length, Spaceship &spaceship);
-void drawOpponent(float length, Spaceship &spaceship);
-void drawBullet(Coordinates &coordinates);
+void drawSpaceship(float length, Spaceship &spaceship);
+void drawBullet(Bullet &bullet);
+void drawSpaceshipBullets(Spaceship &spaceship);
 void transformOpponent(Spaceship &spaceship);
-void display();
-void animation();
+void propelSpaceshipBullets(Spaceship &spaceship);
+void shootBlankOrLiveBullet(Spaceship &spaceship);
 
 // FIXED CONFIGURATIONS
 
@@ -49,52 +52,34 @@ Coordinates observedCoordinates(0, 0, 0);
 Coordinates observerCoordinates(0, 3, 5);
 Coordinates mouseCoordinates(0, 0, 0);
 
-Spaceship player(0, 0, 2.5, 0, 0, 0, 0);
-Spaceship opponent(0, 0, -3, 0, 0, 0, 0);
+Spaceship player(false, 0, 0, 2.5, 0, 0, 0, 0);
+Spaceship opponent(true, 0, 0, -3, 0, 0, 0, 0);
 
 Coordinates spotlights(0, 0, 0);
 
-unsigned long int opponentBulletCounter = 0;
+// DISPLAY & ANIMATION
 
-// CAMERA & LIGHTS
+void display() {
+  setupLights(player.coordinates->x, player.coordinates->y, player.coordinates->z);
+  setupCamera();
 
-void setupCamera() {
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  drawSpaceship(0.7, player);
+  drawSpaceship(0.7, opponent);
 
-  glMatrixMode(GL_PROJECTION);
-  glLoadIdentity();
-  gluPerspective(45.0f, 300 / 300, 0.1f, 300.0f);
+  drawSpaceshipBullets(player);
+  drawSpaceshipBullets(opponent);
 
-  glMatrixMode(GL_MODELVIEW);
-  glLoadIdentity();
-
-  gluLookAt(observerCoordinates.x, observerCoordinates.y, observerCoordinates.z,
-            observedCoordinates.x,observedCoordinates.y , observedCoordinates.z,
-            0, 1, 0);
+  glFlush();
 }
 
-void setupLights(float playerx, float playery, float playerz) {
+void animation() {
+  transformOpponent(opponent);
+  shootBlankOrLiveBullet(opponent);
 
-  GLfloat lmodel_ambient[] = { 0.1f, 0.1f, 0.1f, 1.0f };
-	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, lmodel_ambient); // fv -->float vector
+  propelSpaceshipBullets(player);
+  propelSpaceshipBullets(opponent);
 
-	GLfloat l0Diffuse[] = { 1.0, 1.0f, 1.0f, 1.0f };
-	GLfloat l0Position[] = { playerx - 0.45, playery + 0.45, playerz - 0.45, 1 };
-	GLfloat l0Direction[] = { 0.0, 0.0, -1.0 };
-	glLightfv(GL_LIGHT0, GL_DIFFUSE, l0Diffuse);
-	glLightfv(GL_LIGHT0, GL_POSITION, l0Position);
-	glLightf(GL_LIGHT0, GL_SPOT_CUTOFF, 20.0);
-	glLightf(GL_LIGHT0, GL_SPOT_EXPONENT, 2.0);
-	glLightfv(GL_LIGHT0, GL_SPOT_DIRECTION, l0Direction);
-
-	GLfloat l1Diffuse[] = { 1.0f, 1.0f, 1.0f, 1.0f };
-	GLfloat l1Position[] = { playerx + 0.45, playery + 0.45, playerz - 0.45, 1};//s homogeneous bit (sunlight 0 vs. spotlight 1 ) differene in ambient (fading/ non fading)
-	GLfloat l1Direction[] = { 0.0, 0.0, -1.0 };
-	glLightfv(GL_LIGHT1, GL_DIFFUSE, l1Diffuse);
-	glLightfv(GL_LIGHT1, GL_POSITION, l1Position);// vector
-	glLightf(GL_LIGHT1, GL_SPOT_CUTOFF, 20.0);// number in (angle)
-	glLightf(GL_LIGHT1, GL_SPOT_EXPONENT, 2.0);
-	glLightfv(GL_LIGHT1, GL_SPOT_DIRECTION, l1Direction);
+  glutPostRedisplay();
 }
 
 // HANDLERS
@@ -121,9 +106,8 @@ void keyboardHandler(unsigned char k, int x, int y) {
       observerCoordinates.x--;
   if(k == 'd')
       observerCoordinates.x++;
-  if(k == 32) {
-    Coordinates newCoordinates(player.coordinates->x, player.coordinates->y, player.coordinates->z);
-    playerBullets.push_back(newCoordinates);
+  if(k == ' ') {
+    player.bullets.push_back(Bullet(true, player.coordinates->x, player.coordinates->y, player.coordinates->z));
   }
 
   glutPostRedisplay();
@@ -151,26 +135,25 @@ void specialKeyboardUpHandler(int k, int x, int y) {
 
 // DRAWABLES
 
-void drawPlayer(float length, Spaceship &spaceship) {
+void drawSpaceship(float length, Spaceship &spaceship) {
   glPushMatrix();
   glTranslated(spaceship.coordinates->x, spaceship.coordinates->y, spaceship.coordinates->z);
-  glRotated(spaceship.rotation->angle, 0,0,-1);
+  glRotated(spaceship.rotation->angle, 0, 0, -1);
   glutSolidCube(length);
   glPopMatrix();
 }
 
-void drawBullet(Coordinates &coordinates) {
+void drawBullet(Bullet &bullet) {
   glPushMatrix();
-  glTranslated(coordinates.x, coordinates.y, coordinates.z);
+  glTranslated(bullet.coordinates->x, bullet.coordinates->y, bullet.coordinates->z);
   glutSolidCube(0.2);
   glPopMatrix();
 }
 
-void drawOpponent(float length, Spaceship &spaceship) {
-  glPushMatrix();
-  glTranslated(spaceship.coordinates->x, spaceship.coordinates->y, spaceship.coordinates->z);
-  glutSolidCube(length);
-  glPopMatrix();
+void drawSpaceshipBullets(Spaceship &spaceship) {
+  for (unsigned int i = 0; i < spaceship.bullets.size(); i++) {
+    drawBullet(spaceship.bullets[i]);
+  }
 }
 
 void drawSkybox() {
@@ -194,62 +177,73 @@ void drawSkybox() {
 void transformOpponent(Spaceship &spaceship) {
   srand(time(NULL));
 
-  if(rand() % 2 == 0)
-    spaceship.coordinates->x += 0.001;
-  else
+  if(rand() % 2 == 0) {
+      spaceship.coordinates->x += 0.001;
+  } else {
     spaceship.coordinates->x -= 0.001;
+  }
 
-  if(spaceship.coordinates->x > 3.5)
+  if(spaceship.coordinates->x > 3.5) {
     spaceship.coordinates->x -= 7;
-  if(spaceship.coordinates->x < -3.5)
+  }
+  if(spaceship.coordinates->x < -3.5) {
     spaceship.coordinates->x += 7;
-}
-
-void transformPlayerBullets() {
-  for (unsigned char i = 0; i < playerBullets.size(); i++) {
-    // TODO: remove out-of-bounds bullet objects
-    playerBullets[i].z -= 0.1;
   }
 }
 
-void transformOpponentBullets() {
-  for (unsigned char i = 0; i < opponentBullets.size(); i++) {
-    // TODO: remove out-of-bounds bullet objects
-    opponentBullets[i].z += 0.05;
-  }
-
-  if(opponentBulletCounter++ == 200) {
-    Coordinates newCoordinates(opponent.coordinates->x, opponent.coordinates->y, opponent.coordinates->z);
-    opponentBullets.push_back(newCoordinates);
-    opponentBulletCounter = 0;
+void propelSpaceshipBullets(Spaceship &spaceship) {
+  for (unsigned int i = 0; i < spaceship.bullets.size(); i++) {
+    if(spaceship.bullets[i].isAirborne) {
+      spaceship.bullets[i].coordinates->z += (spaceship.isHostile)? 0.1 : -0.1;
+    }
   }
 }
 
-// DISPLAY & ANIMATION
-
-void display() {
-  setupLights(player.coordinates->x, player.coordinates->y, player.coordinates->z);
-  setupCamera();
-  drawPlayer(0.7, player);
-  drawOpponent(0.7, opponent);
-  //drawSkybox();
-
-  for (unsigned char i = 0; i < playerBullets.size(); i++) {
-    drawBullet(playerBullets[i]);
+void shootBlankOrLiveBullet(Spaceship &spaceship) {
+  if(spaceship.firingDelay++ == 200) {
+    spaceship.bullets.push_back(Bullet(true, spaceship.coordinates->x, spaceship.coordinates->y, spaceship.coordinates->z));
+    spaceship.firingDelay = 0;
   }
-	for (unsigned char i = 0; i < opponentBullets.size(); i++) {
-    drawBullet(opponentBullets[i]);
-  }
-
-  glFlush();
 }
 
-void animation() {
-  transformOpponent(opponent);
-  transformPlayerBullets();
-  transformOpponentBullets();
+// CAMERA & LIGHTS
 
-  glutPostRedisplay();
+void setupCamera() {
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+  glMatrixMode(GL_PROJECTION);
+  glLoadIdentity();
+  gluPerspective(45.0f, 300 / 300, 0.1f, 300.0f);
+
+  glMatrixMode(GL_MODELVIEW);
+  glLoadIdentity();
+
+  gluLookAt(observerCoordinates.x, observerCoordinates.y, observerCoordinates.z,
+            observedCoordinates.x,observedCoordinates.y , observedCoordinates.z,
+            0, 1, 0);
+}
+
+void setupLights(float playerx, float playery, float playerz) {
+  GLfloat lmodel_ambient[] = { 0.1f, 0.1f, 0.1f, 1.0f };
+	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, lmodel_ambient); // fv -->float vector
+
+	GLfloat l0Diffuse[] = { 1.0, 1.0f, 1.0f, 1.0f };
+	GLfloat l0Position[] = { playerx - 0.45, playery + 0.45, playerz - 0.45, 1 };
+	GLfloat l0Direction[] = { 0.0, 0.0, -1.0 };
+	glLightfv(GL_LIGHT0, GL_DIFFUSE, l0Diffuse);
+	glLightfv(GL_LIGHT0, GL_POSITION, l0Position);
+	glLightf(GL_LIGHT0, GL_SPOT_CUTOFF, 20.0);
+	glLightf(GL_LIGHT0, GL_SPOT_EXPONENT, 2.0);
+	glLightfv(GL_LIGHT0, GL_SPOT_DIRECTION, l0Direction);
+
+	GLfloat l1Diffuse[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+	GLfloat l1Position[] = { playerx + 0.45, playery + 0.45, playerz - 0.45, 1};//s homogeneous bit (sunlight 0 vs. spotlight 1 ) differene in ambient (fading/ non fading)
+	GLfloat l1Direction[] = { 0.0, 0.0, -1.0 };
+	glLightfv(GL_LIGHT1, GL_DIFFUSE, l1Diffuse);
+	glLightfv(GL_LIGHT1, GL_POSITION, l1Position);// vector
+	glLightf(GL_LIGHT1, GL_SPOT_CUTOFF, 20.0);// number in (angle)
+	glLightf(GL_LIGHT1, GL_SPOT_EXPONENT, 2.0);
+	glLightfv(GL_LIGHT1, GL_SPOT_DIRECTION, l1Direction);
 }
 
 // MAIN
