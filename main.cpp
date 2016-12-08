@@ -155,15 +155,18 @@ void drawSpaceshipBullets(Spaceship &spaceship) {
 void transformOpponent(Spaceship &spaceship) {
   srand(time(NULL));
 
-  if(rand() % 2 == 0)
-    spaceship.coordinates->x += 0.001;
-  else
+  if(rand() % 2 == 0) {
+      spaceship.coordinates->x += 0.001;
+  } else {
     spaceship.coordinates->x -= 0.001;
+  }
 
-  if(spaceship.coordinates->x > 3.5)
+  if(spaceship.coordinates->x > 3.5) {
     spaceship.coordinates->x -= 7;
-  if(spaceship.coordinates->x < -3.5)
+  }
+  if(spaceship.coordinates->x < -3.5) {
     spaceship.coordinates->x += 7;
+  }
 }
 
 void propelSpaceshipBullets(Spaceship &spaceship) {
