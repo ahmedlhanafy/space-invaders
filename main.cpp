@@ -1,5 +1,7 @@
 // IMPORTS
-
+#include "TextureBuilder.h"
+#include "Model_3DS.h"
+#include "GLTexture.h"
 #include <stdio.h>
 #include <time.h>
 #include <vector>
@@ -41,6 +43,7 @@ int WINDOW_POSITION_Y = 150;
 
 vector<Coordinates> playerBullets;
 vector<Coordinates> opponentBullets;
+GLuint tex;
 
 Coordinates observedCoordinates(0, 0, 0);
 Coordinates observerCoordinates(0, 3, 5);
@@ -170,6 +173,22 @@ void drawOpponent(float length, Spaceship &spaceship) {
   glPopMatrix();
 }
 
+void drawSkybox() {
+	glPushMatrix();
+
+	GLUquadricObj * qobj;
+	qobj = gluNewQuadric();
+	glTranslated(50,0,0);
+	glRotated(90,1,0,1);
+	glBindTexture(GL_TEXTURE_2D, tex);
+	gluQuadricTexture(qobj,true);
+	gluQuadricNormals(qobj,GL_SMOOTH);
+	gluSphere(qobj,100,100,100);
+	gluDeleteQuadric(qobj);
+	
+	glPopMatrix();
+}
+
 // TRANSFORMATIONS
 
 void transformOpponent(Spaceship &spaceship) {
@@ -213,6 +232,7 @@ void display() {
   setupCamera();
   drawPlayer(0.7, player);
   drawOpponent(0.7, opponent);
+  //drawSkybox();
 
   for (unsigned char i = 0; i < playerBullets.size(); i++) {
     drawBullet(playerBullets[i]);
