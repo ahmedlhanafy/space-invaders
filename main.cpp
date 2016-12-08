@@ -33,6 +33,7 @@ void drawSpaceshipBullets(Spaceship &spaceship);
 void transformOpponent(Spaceship &spaceship);
 void propelSpaceshipBullets(Spaceship &spaceship);
 void shootBlankOrLiveBullet(Spaceship &spaceship);
+void drawSkybox();
 
 // FIXED CONFIGURATIONS
 
@@ -66,6 +67,7 @@ void display() {
   drawSpaceship(0.7, player);
   drawSpaceship(0.7, opponent);
 
+  drawSkybox();
   drawSpaceshipBullets(player);
   drawSpaceshipBullets(opponent);
 
@@ -227,6 +229,15 @@ void setupLights(float playerx, float playery, float playerz) {
   GLfloat lmodel_ambient[] = { 0.1f, 0.1f, 0.1f, 1.0f };
 	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, lmodel_ambient); // fv -->float vector
 
+		GLfloat mat_ambient[] = { 0.7f, 0.7, 0.7, 1.0f };
+	GLfloat mat_diffuse[] = { 0.8f, 0.8f, 0.8, 1.0f };
+	GLfloat mat_specular[] = { 0.9f, 0.9f, 0.9, 1.0f };
+	GLfloat mat_shininess[] = { 50 };
+	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, mat_ambient);
+	glMaterialfv(GL_FRONT, GL_DIFFUSE, mat_diffuse);
+	glMaterialfv(GL_FRONT, GL_SPECULAR, mat_specular);
+	glMaterialfv(GL_FRONT, GL_SHININESS, mat_shininess);
+
 	GLfloat l0Diffuse[] = { 1.0, 1.0f, 1.0f, 1.0f };
 	GLfloat l0Position[] = { playerx - 0.45, playery + 0.45, playerz - 0.45, 1 };
 	GLfloat l0Direction[] = { 0.0, 0.0, -1.0 };
@@ -244,6 +255,13 @@ void setupLights(float playerx, float playery, float playerz) {
 	glLightf(GL_LIGHT1, GL_SPOT_CUTOFF, 20.0);// number in (angle)
 	glLightf(GL_LIGHT1, GL_SPOT_EXPONENT, 2.0);
 	glLightfv(GL_LIGHT1, GL_SPOT_DIRECTION, l1Direction);
+
+	GLfloat lightIntensity[] = { 0.5f, 0.5f, 0.5, 1.0f };
+	GLfloat light_position[] = { 7.0f,4.0f,15.0f,0.0f };
+	GLfloat light_direction[] = { 0,0,-1.0,0 };
+	glLightfv(GL_LIGHT2, GL_POSITION, light_position);
+	glLightfv(GL_LIGHT2, GL_DIFFUSE, lightIntensity);
+	glLightfv(GL_LIGHT2, GL_SPOT_DIRECTION, light_direction);
 }
 
 // MAIN
@@ -265,6 +283,7 @@ int main(int argc, char** argv) {
   glEnable(GL_LIGHTING);
   glEnable(GL_LIGHT0);
   glEnable(GL_LIGHT1);
+  glEnable(GL_LIGHT2);
   glEnable(GL_NORMALIZE);
   glEnable(GL_COLOR_MATERIAL);
   glShadeModel(GL_SMOOTH);
