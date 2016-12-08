@@ -3,7 +3,7 @@ public:
   bool isHostile;
   Coordinates* coordinates;
   Rotation* rotation;
-  std::vector<Coordinates> bullets;
+  std::vector<Bullet> bullets;
   int firingDelay;
     Spaceship(bool isHostile, float tx, float ty, float tz, float angle, float rx, float ry, float rz);
 };

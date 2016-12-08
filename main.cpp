@@ -6,6 +6,7 @@
 #include <GL/glut.h>
 #include "Coordinates.h"
 #include "Rotation.h"
+#include "Bullet.h"
 #include "Spaceship.h"
 
 using namespace std;
@@ -25,7 +26,7 @@ void keyboardHandler(unsigned char k, int x, int y);
 void specialKeyboardHandler(int k, int x, int y);
 void specialKeyboardUpHandler(int k, int x, int y);
 void drawSpaceship(float length, Spaceship &spaceship);
-void drawBullet(Coordinates &coordinates);
+void drawBullet(Bullet &bullet);
 void drawSpaceshipBullets(Spaceship &spaceship);
 void transformOpponent(Spaceship &spaceship);
 void transformSpaceshipBullets(Spaceship &spaceship);
@@ -140,8 +141,7 @@ void keyboardHandler(unsigned char k, int x, int y) {
   if(k == 'd')
       observerCoordinates.x++;
   if(k == ' ') {
-    Coordinates newCoordinates(player.coordinates->x, player.coordinates->y, player.coordinates->z);
-    player.bullets.push_back(newCoordinates);
+    player.bullets.push_back(Bullet(true, player.coordinates->x, player.coordinates->y, player.coordinates->z));
   }
 
   glutPostRedisplay();
@@ -177,9 +177,9 @@ void drawSpaceship(float length, Spaceship &spaceship) {
   glPopMatrix();
 }
 
-void drawBullet(Coordinates &coordinates) {
+void drawBullet(Bullet &bullet) {
   glPushMatrix();
-  glTranslated(coordinates.x, coordinates.y, coordinates.z);
+  glTranslated(bullet.coordinates->x, bullet.coordinates->y, bullet.coordinates->z);
   glutSolidCube(0.2);
   glPopMatrix();
 }
@@ -209,13 +209,13 @@ void transformOpponent(Spaceship &spaceship) {
 void transformSpaceshipBullets(Spaceship &spaceship) {
   for (unsigned int i = 0; i < spaceship.bullets.size(); i++) {
     // TODO: remove out-of-bounds bullet objects
-    spaceship.bullets[i].z += (spaceship.isHostile)? 0.1 : -0.1;
+    spaceship.bullets[i].coordinates->z += (spaceship.isHostile)? 0.1 : -0.1;
   }
 }
 
 void shootBlankOrLiveBullet(Spaceship &spaceship) {
   if(spaceship.firingDelay++ == 200) {
-    spaceship.bullets.push_back(Coordinates(spaceship.coordinates->x, spaceship.coordinates->y, spaceship.coordinates->z));
+    spaceship.bullets.push_back(Bullet(true, spaceship.coordinates->x, spaceship.coordinates->y, spaceship.coordinates->z));
     spaceship.firingDelay = 0;
   }
 }
