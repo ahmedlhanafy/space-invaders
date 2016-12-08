@@ -139,7 +139,7 @@ void keyboardHandler(unsigned char k, int x, int y) {
       observerCoordinates.x--;
   if(k == 'd')
       observerCoordinates.x++;
-  if(k == 32) {
+  if(k == ' ') {
     Coordinates newCoordinates(player.coordinates->x, player.coordinates->y, player.coordinates->z);
     player.bullets.push_back(newCoordinates);
   }
