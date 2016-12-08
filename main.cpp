@@ -6,6 +6,7 @@
 #include <GL/glut.h>
 #include "Coordinates.h"
 #include "Rotation.h"
+#include "Bullet.h"
 #include "Spaceship.h"
 
 using namespace std;
@@ -16,18 +17,20 @@ using namespace std;
 
 // DEFINITIONS
 
+void display();
+void animation();
 void setupCamera();
 void setupLights(float playerx, float playery, float playerz);
 void mouseHandler(int x, int y);
 void keyboardHandler(unsigned char k, int x, int y);
 void specialKeyboardHandler(int k, int x, int y);
 void specialKeyboardUpHandler(int k, int x, int y);
-void drawPlayer(float length, Spaceship &spaceship);
-void drawOpponent(float length, Spaceship &spaceship);
-void drawBullet(Coordinates &coordinates);
+void drawSpaceship(float length, Spaceship &spaceship);
+void drawBullet(Bullet &bullet);
+void drawSpaceshipBullets(Spaceship &spaceship);
 void transformOpponent(Spaceship &spaceship);
-void display();
-void animation();
+void propelSpaceshipBullets(Spaceship &spaceship);
+void shootBlankOrLiveBullet(Spaceship &spaceship);
 
 // FIXED CONFIGURATIONS
 
@@ -39,18 +42,147 @@ int WINDOW_POSITION_Y = 150;
 
 // VARIABLE CONFIGURATIONS
 
-vector<Coordinates> playerBullets;
-vector<Coordinates> opponentBullets;
-
 Coordinates observedCoordinates(0, 0, 0);
 Coordinates observerCoordinates(0, 3, 5);
 Coordinates mouseCoordinates(0, 0, 0);
 
-Spaceship player(0, 0, 2.5, 0, 0, 0, 0);
-Spaceship opponent(0, 0, -3, 0, 0, 0, 0);
+Spaceship player(false, 0, 0, 2.5, 0, 0, 0, 0);
+Spaceship opponent(true, 0, 0, -3, 0, 0, 0, 0);
 
 Coordinates spotlights(0, 0, 0);
-unsigned long int opponentBulletCounter = 0;
+
+// DISPLAY & ANIMATION
+
+void display() {
+  setupLights(player.coordinates->x, player.coordinates->y, player.coordinates->z);
+  setupCamera();
+
+  drawSpaceship(0.7, player);
+  drawSpaceship(0.7, opponent);
+
+  drawSpaceshipBullets(player);
+  drawSpaceshipBullets(opponent);
+
+  glFlush();
+}
+
+void animation() {
+  transformOpponent(opponent);
+  shootBlankOrLiveBullet(opponent);
+
+  propelSpaceshipBullets(player);
+  propelSpaceshipBullets(opponent);
+
+  glutPostRedisplay();
+}
+
+// HANDLERS
+
+void mouseHandler(int x, int y) {
+  mouseCoordinates.x = x;
+  mouseCoordinates.y = WINDOW_HEIGHT - y;
+
+  glutPostRedisplay();
+}
+
+void keyboardHandler(unsigned char k, int x, int y) {
+  if(k == 27)
+      exit(0);
+  if(k == 'w')
+      observerCoordinates.z--;
+  if(k == 's')
+      observerCoordinates.z++;
+  if(k == 'r')
+      observerCoordinates.y++;
+  if(k == 'f')
+      observerCoordinates.y--;
+  if(k == 'a')
+      observerCoordinates.x--;
+  if(k == 'd')
+      observerCoordinates.x++;
+  if(k == ' ') {
+    player.bullets.push_back(Bullet(true, player.coordinates->x, player.coordinates->y, player.coordinates->z));
+  }
+
+  glutPostRedisplay();
+}
+
+void specialKeyboardHandler(int k, int x, int y) {
+  if(k == GLUT_KEY_RIGHT) {
+    player.coordinates->x += 0.1;
+    player.rotation->angle += 15;
+  }
+  if(k == GLUT_KEY_LEFT) {
+    player.coordinates->x -= 0.1;
+    player.rotation->angle -= 15;
+  }
+}
+
+void specialKeyboardUpHandler(int k, int x, int y) {
+  if(k == GLUT_KEY_RIGHT) {
+    player.rotation->angle = 0;
+  }
+  if(k == GLUT_KEY_LEFT) {
+    player.rotation->angle = 0;
+  }
+}
+
+// DRAWABLES
+
+void drawSpaceship(float length, Spaceship &spaceship) {
+  glPushMatrix();
+  glTranslated(spaceship.coordinates->x, spaceship.coordinates->y, spaceship.coordinates->z);
+  glRotated(spaceship.rotation->angle, 0, 0, -1);
+  glutSolidCube(length);
+  glPopMatrix();
+}
+
+void drawBullet(Bullet &bullet) {
+  glPushMatrix();
+  glTranslated(bullet.coordinates->x, bullet.coordinates->y, bullet.coordinates->z);
+  glutSolidCube(0.2);
+  glPopMatrix();
+}
+
+void drawSpaceshipBullets(Spaceship &spaceship) {
+  for (unsigned int i = 0; i < spaceship.bullets.size(); i++) {
+    drawBullet(spaceship.bullets[i]);
+  }
+}
+
+// TRANSFORMATIONS
+
+void transformOpponent(Spaceship &spaceship) {
+  srand(time(NULL));
+
+  if(rand() % 2 == 0) {
+      spaceship.coordinates->x += 0.001;
+  } else {
+    spaceship.coordinates->x -= 0.001;
+  }
+
+  if(spaceship.coordinates->x > 3.5) {
+    spaceship.coordinates->x -= 7;
+  }
+  if(spaceship.coordinates->x < -3.5) {
+    spaceship.coordinates->x += 7;
+  }
+}
+
+void propelSpaceshipBullets(Spaceship &spaceship) {
+  for (unsigned int i = 0; i < spaceship.bullets.size(); i++) {
+    if(spaceship.bullets[i].isAirborne) {
+      spaceship.bullets[i].coordinates->z += (spaceship.isHostile)? 0.1 : -0.1;
+    }
+  }
+}
+
+void shootBlankOrLiveBullet(Spaceship &spaceship) {
+  if(spaceship.firingDelay++ == 200) {
+    spaceship.bullets.push_back(Bullet(true, spaceship.coordinates->x, spaceship.coordinates->y, spaceship.coordinates->z));
+    spaceship.firingDelay = 0;
+  }
+}
 
 // CAMERA & LIGHTS
 
@@ -90,144 +222,6 @@ void setupLights(float playerx, float playery, float playerz) {
 	glLightf(GL_LIGHT1, GL_SPOT_CUTOFF, 20.0);// number in (angle)
 	glLightf(GL_LIGHT1, GL_SPOT_EXPONENT, 2.0);
 	glLightfv(GL_LIGHT1, GL_SPOT_DIRECTION, l1Direction);
-}
-
-// HANDLERS
-
-void mouseHandler(int x, int y) {
-  mouseCoordinates.x = x;
-  mouseCoordinates.y = WINDOW_HEIGHT - y;
-
-  glutPostRedisplay();
-}
-
-void keyboardHandler(unsigned char k, int x, int y) {
-  if(k == 27)
-      exit(0);
-  if(k == 'w')
-      observerCoordinates.z--;
-  if(k == 's')
-      observerCoordinates.z++;
-  if(k == 'r')
-      observerCoordinates.y++;
-  if(k == 'f')
-      observerCoordinates.y--;
-  if(k == 'a')
-      observerCoordinates.x--;
-  if(k == 'd')
-      observerCoordinates.x++;
-  if(k == 32) {
-    Coordinates newCoordinates(player.coordinates->x, player.coordinates->y, player.coordinates->z);
-    playerBullets.push_back(newCoordinates);
-  }
-
-  glutPostRedisplay();
-}
-
-void specialKeyboardHandler(int k, int x, int y) {
-  if(k == GLUT_KEY_RIGHT) {
-    player.coordinates->x += 0.1;
-    player.rotation->angle += 15;
-  }
-  if(k == GLUT_KEY_LEFT) {
-    player.coordinates->x -= 0.1;
-    player.rotation->angle -= 15;
-  }
-}
-
-void specialKeyboardUpHandler(int k, int x, int y) {
-  if(k == GLUT_KEY_RIGHT) {
-    player.rotation->angle = 0;
-  }
-  if(k == GLUT_KEY_LEFT) {
-    player.rotation->angle = 0;
-  }
-}
-
-// DRAWABLES
-
-void drawPlayer(float length, Spaceship &spaceship) {
-  glPushMatrix();
-  glTranslated(spaceship.coordinates->x, spaceship.coordinates->y, spaceship.coordinates->z);
-  glRotated(spaceship.rotation->angle, 0,0,-1);
-  glutSolidCube(length);
-  glPopMatrix();
-}
-
-void drawBullet(Coordinates &coordinates) {
-  glPushMatrix();
-  glTranslated(coordinates.x, coordinates.y, coordinates.z);
-  glutSolidCube(0.2);
-  glPopMatrix();
-}
-
-void drawOpponent(float length, Spaceship &spaceship) {
-  glPushMatrix();
-  glTranslated(spaceship.coordinates->x, spaceship.coordinates->y, spaceship.coordinates->z);
-  glutSolidCube(length);
-  glPopMatrix();
-}
-
-// TRANSFORMATIONS
-
-void transformOpponent(Spaceship &spaceship) {
-  srand(time(NULL));
-
-  if(rand() % 2 == 0)
-    spaceship.coordinates->x += 0.001;
-  else
-    spaceship.coordinates->x -= 0.001;
-
-  if(spaceship.coordinates->x > 3.5)
-    spaceship.coordinates->x -= 7;
-  if(spaceship.coordinates->x < -3.5)
-    spaceship.coordinates->x += 7;
-}
-
-void transformPlayerBullets() {
-  for (unsigned char i = 0; i < playerBullets.size(); i++) {
-    // TODO: remove out-of-bounds bullet objects
-    playerBullets[i].z -= 0.1;
-  }
-}
-
-void transformOpponentBullets() {
-  for (unsigned char i = 0; i < opponentBullets.size(); i++) {
-    // TODO: remove out-of-bounds bullet objects
-    opponentBullets[i].z += 0.05;
-  }
-
-  if(opponentBulletCounter++ == 200) {
-    Coordinates newCoordinates(opponent.coordinates->x, opponent.coordinates->y, opponent.coordinates->z);
-    opponentBullets.push_back(newCoordinates);
-    opponentBulletCounter = 0;
-  }
-}
-
-// DISPLAY & ANIMATION
-
-void display() {
-  setupLights(player.coordinates->x, player.coordinates->y, player.coordinates->z);
-  setupCamera();
-  drawPlayer(0.7, player);
-  drawOpponent(0.7, opponent);
-
-  for (unsigned char i = 0; i < playerBullets.size(); i++) {
-    drawBullet(playerBullets[i]);
-  }
-	for (unsigned char i = 0; i < opponentBullets.size(); i++) {
-    drawBullet(opponentBullets[i]);
-  }
-
-  glFlush();
-}
-
-void animation() {
-  transformOpponent(opponent);
-  transformPlayerBullets();
-  transformOpponentBullets();
-
-  glutPostRedisplay();
 }
 
 // MAIN
