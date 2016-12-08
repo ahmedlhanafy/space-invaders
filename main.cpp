@@ -29,7 +29,7 @@ void drawSpaceship(float length, Spaceship &spaceship);
 void drawBullet(Bullet &bullet);
 void drawSpaceshipBullets(Spaceship &spaceship);
 void transformOpponent(Spaceship &spaceship);
-void transformSpaceshipBullets(Spaceship &spaceship);
+void propelSpaceshipBullets(Spaceship &spaceship);
 void shootBlankOrLiveBullet(Spaceship &spaceship);
 
 // FIXED CONFIGURATIONS
@@ -70,8 +70,8 @@ void animation() {
   transformOpponent(opponent);
   shootBlankOrLiveBullet(opponent);
 
-  transformSpaceshipBullets(player);
-  transformSpaceshipBullets(opponent);
+  propelSpaceshipBullets(player);
+  propelSpaceshipBullets(opponent);
 
   glutPostRedisplay();
 }
@@ -166,7 +166,7 @@ void transformOpponent(Spaceship &spaceship) {
     spaceship.coordinates->x += 7;
 }
 
-void transformSpaceshipBullets(Spaceship &spaceship) {
+void propelSpaceshipBullets(Spaceship &spaceship) {
   for (unsigned int i = 0; i < spaceship.bullets.size(); i++) {
     if(spaceship.bullets[i].isAirborne) {
       spaceship.bullets[i].coordinates->z += (spaceship.isHostile)? 0.1 : -0.1;
