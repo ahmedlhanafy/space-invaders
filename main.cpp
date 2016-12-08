@@ -39,9 +39,6 @@ int WINDOW_POSITION_Y = 150;
 
 // VARIABLE CONFIGURATIONS
 
-vector<Coordinates> playerBullets;
-vector<Coordinates> opponentBullets;
-
 Coordinates observedCoordinates(0, 0, 0);
 Coordinates observerCoordinates(0, 3, 5);
 Coordinates mouseCoordinates(0, 0, 0);
@@ -118,7 +115,7 @@ void keyboardHandler(unsigned char k, int x, int y) {
       observerCoordinates.x++;
   if(k == 32) {
     Coordinates newCoordinates(player.coordinates->x, player.coordinates->y, player.coordinates->z);
-    playerBullets.push_back(newCoordinates);
+    player.bullets.push_back(newCoordinates);
   }
 
   glutPostRedisplay();
@@ -185,21 +182,21 @@ void transformOpponent(Spaceship &spaceship) {
 }
 
 void transformPlayerBullets() {
-  for (unsigned char i = 0; i < playerBullets.size(); i++) {
+  for (unsigned char i = 0; i < player.bullets.size(); i++) {
     // TODO: remove out-of-bounds bullet objects
-    playerBullets[i].z -= 0.1;
+    player.bullets[i].z -= 0.1;
   }
 }
 
 void transformOpponentBullets() {
-  for (unsigned char i = 0; i < opponentBullets.size(); i++) {
+  for (unsigned char i = 0; i < opponent.bullets.size(); i++) {
     // TODO: remove out-of-bounds bullet objects
-    opponentBullets[i].z += 0.05;
+    opponent.bullets[i].z += 0.05;
   }
 
   if(opponentBulletCounter++ == 200) {
     Coordinates newCoordinates(opponent.coordinates->x, opponent.coordinates->y, opponent.coordinates->z);
-    opponentBullets.push_back(newCoordinates);
+    opponent.bullets.push_back(newCoordinates);
     opponentBulletCounter = 0;
   }
 }
@@ -212,11 +209,11 @@ void display() {
   drawPlayer(0.7, player);
   drawOpponent(0.7, opponent);
 
-  for (unsigned char i = 0; i < playerBullets.size(); i++) {
-    drawBullet(playerBullets[i]);
+  for (unsigned char i = 0; i < player.bullets.size(); i++) {
+    drawBullet(player.bullets[i]);
   }
-	for (unsigned char i = 0; i < opponentBullets.size(); i++) {
-    drawBullet(opponentBullets[i]);
+	for (unsigned char i = 0; i < opponent.bullets.size(); i++) {
+    drawBullet(opponent.bullets[i]);
   }
 
   glFlush();
