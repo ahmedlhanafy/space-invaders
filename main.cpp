@@ -185,7 +185,7 @@ void drawBullet(Coordinates &coordinates) {
 }
 
 void drawSpaceshipBullets(Spaceship &spaceship) {
-  for (unsigned char i = 0; i < spaceship.bullets.size(); i++) {
+  for (unsigned int i = 0; i < spaceship.bullets.size(); i++) {
     drawBullet(spaceship.bullets[i]);
   }
 }
@@ -207,7 +207,7 @@ void transformOpponent(Spaceship &spaceship) {
 }
 
 void transformSpaceshipBullets(Spaceship &spaceship) {
-  for (unsigned char i = 0; i < spaceship.bullets.size(); i++) {
+  for (unsigned int i = 0; i < spaceship.bullets.size(); i++) {
     // TODO: remove out-of-bounds bullet objects
     spaceship.bullets[i].z += (spaceship.isHostile)? 0.1 : -0.1;
   }
