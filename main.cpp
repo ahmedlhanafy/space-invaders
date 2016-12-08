@@ -168,8 +168,9 @@ void transformOpponent(Spaceship &spaceship) {
 
 void transformSpaceshipBullets(Spaceship &spaceship) {
   for (unsigned int i = 0; i < spaceship.bullets.size(); i++) {
-    // TODO: remove out-of-bounds bullet objects
-    spaceship.bullets[i].coordinates->z += (spaceship.isHostile)? 0.1 : -0.1;
+    if(spaceship.bullets[i].isAirborne) {
+      spaceship.bullets[i].coordinates->z += (spaceship.isHostile)? 0.1 : -0.1;
+    }
   }
 }
 
