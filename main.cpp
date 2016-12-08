@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <time.h>
 #include <vector>
-#include <glut.h>
+#include <GL/glut.h>
 #include "Coordinates.h"
 #include "Rotation.h"
 #include "Spaceship.h"
@@ -168,6 +168,8 @@ void drawOpponent(float length, Spaceship &spaceship) {
   glPopMatrix();
 }
 
+// TRANSFORMATIONS
+
 void transformOpponent(Spaceship &spaceship) {
   srand(time(NULL));
 
@@ -180,6 +182,26 @@ void transformOpponent(Spaceship &spaceship) {
     spaceship.coordinates->x -= 7;
   if(spaceship.coordinates->x < -3.5)
     spaceship.coordinates->x += 7;
+}
+
+void transformPlayerBullets() {
+  for (unsigned char i = 0; i < playerBullets.size(); i++) {
+    // TODO: remove out-of-bounds bullet objects
+    playerBullets[i].z -= 0.1;
+  }
+}
+
+void transformOpponentBullets() {
+  for (unsigned char i = 0; i < opponentBullets.size(); i++) {
+    // TODO: remove out-of-bounds bullet objects
+    opponentBullets[i].z += 0.05;
+  }
+
+  if(opponentBulletCounter++ == 200) {
+    Coordinates newCoordinates(opponent.coordinates->x, opponent.coordinates->y, opponent.coordinates->z);
+    opponentBullets.push_back(newCoordinates);
+    opponentBulletCounter = 0;
+  }
 }
 
 // DISPLAY & ANIMATION
@@ -202,22 +224,8 @@ void display() {
 
 void animation() {
   transformOpponent(opponent);
-
-  for (unsigned char i = 0; i < playerBullets.size(); i++) {
-    // TODO: remove out-of-bounds bullet objects
-    playerBullets[i].z -= 0.1;
-  }
-
-  for (unsigned char i = 0; i < opponentBullets.size(); i++) {
-    // TODO: remove out-of-bounds bullet objects
-    opponentBullets[i].z += 0.05;
-  }
-
-  if(opponentBulletCounter++ == 200) {
-    Coordinates newCoordinates(opponent.coordinates->x, opponent.coordinates->y, opponent.coordinates->z);
-    opponentBullets.push_back(newCoordinates);
-    opponentBulletCounter = 0;
-  }
+  transformPlayerBullets();
+  transformOpponentBullets();
 
   glutPostRedisplay();
 }
