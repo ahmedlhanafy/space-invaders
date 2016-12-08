@@ -22,8 +22,7 @@ void mouseHandler(int x, int y);
 void keyboardHandler(unsigned char k, int x, int y);
 void specialKeyboardHandler(int k, int x, int y);
 void specialKeyboardUpHandler(int k, int x, int y);
-void drawPlayer(float length, Spaceship &spaceship);
-void drawOpponent(float length, Spaceship &spaceship);
+void drawSpaceship(float length, Spaceship &spaceship);
 void drawBullet(Coordinates &coordinates);
 void transformOpponent(Spaceship &spaceship);
 void display();
@@ -142,10 +141,10 @@ void specialKeyboardUpHandler(int k, int x, int y) {
 
 // DRAWABLES
 
-void drawPlayer(float length, Spaceship &spaceship) {
+void drawSpaceship(float length, Spaceship &spaceship) {
   glPushMatrix();
   glTranslated(spaceship.coordinates->x, spaceship.coordinates->y, spaceship.coordinates->z);
-  glRotated(spaceship.rotation->angle, 0,0,-1);
+  glRotated(spaceship.rotation->angle, 0, 0, -1);
   glutSolidCube(length);
   glPopMatrix();
 }
@@ -154,13 +153,6 @@ void drawBullet(Coordinates &coordinates) {
   glPushMatrix();
   glTranslated(coordinates.x, coordinates.y, coordinates.z);
   glutSolidCube(0.2);
-  glPopMatrix();
-}
-
-void drawOpponent(float length, Spaceship &spaceship) {
-  glPushMatrix();
-  glTranslated(spaceship.coordinates->x, spaceship.coordinates->y, spaceship.coordinates->z);
-  glutSolidCube(length);
   glPopMatrix();
 }
 
@@ -205,8 +197,8 @@ void transformOpponentBullets() {
 void display() {
   setupLights(player.coordinates->x, player.coordinates->y, player.coordinates->z);
   setupCamera();
-  drawPlayer(0.7, player);
-  drawOpponent(0.7, opponent);
+  drawSpaceship(0.7, player);
+  drawSpaceship(0.7, opponent);
 
   for (unsigned char i = 0; i < player.bullets.size(); i++) {
     drawBullet(player.bullets[i]);
