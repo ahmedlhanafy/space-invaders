@@ -16,6 +16,8 @@ using namespace std;
 
 // DEFINITIONS
 
+void display();
+void animation();
 void setupCamera();
 void setupLights(float playerx, float playery, float playerz);
 void mouseHandler(int x, int y);
@@ -24,9 +26,10 @@ void specialKeyboardHandler(int k, int x, int y);
 void specialKeyboardUpHandler(int k, int x, int y);
 void drawSpaceship(float length, Spaceship &spaceship);
 void drawBullet(Coordinates &coordinates);
+void drawSpaceshipBullets(Spaceship &spaceship);
 void transformOpponent(Spaceship &spaceship);
-void display();
-void animation();
+void transformSpaceshipBullets(Spaceship &spaceship);
+void shootBlankOrLiveBullet(Spaceship &spaceship);
 
 // FIXED CONFIGURATIONS
 
@@ -42,10 +45,35 @@ Coordinates observedCoordinates(0, 0, 0);
 Coordinates observerCoordinates(0, 3, 5);
 Coordinates mouseCoordinates(0, 0, 0);
 
-Spaceship player(0, 0, 2.5, 0, 0, 0, 0);
-Spaceship opponent(0, 0, -3, 0, 0, 0, 0);
+Spaceship player(false, 0, 0, 2.5, 0, 0, 0, 0);
+Spaceship opponent(true, 0, 0, -3, 0, 0, 0, 0);
 
 Coordinates spotlights(0, 0, 0);
+
+// DISPLAY & ANIMATION
+
+void display() {
+  setupLights(player.coordinates->x, player.coordinates->y, player.coordinates->z);
+  setupCamera();
+
+  drawSpaceship(0.7, player);
+  drawSpaceship(0.7, opponent);
+
+  drawSpaceshipBullets(player);
+  drawSpaceshipBullets(opponent);
+
+  glFlush();
+}
+
+void animation() {
+  transformOpponent(opponent);
+  shootBlankOrLiveBullet(opponent);
+
+  transformSpaceshipBullets(player);
+  transformSpaceshipBullets(opponent);
+
+  glutPostRedisplay();
+}
 
 // CAMERA & LIGHTS
 
@@ -178,47 +206,18 @@ void transformOpponent(Spaceship &spaceship) {
     spaceship.coordinates->x += 7;
 }
 
-void transformPlayerBullets() {
-  for (unsigned char i = 0; i < player.bullets.size(); i++) {
+void transformSpaceshipBullets(Spaceship &spaceship) {
+  for (unsigned char i = 0; i < spaceship.bullets.size(); i++) {
     // TODO: remove out-of-bounds bullet objects
-    player.bullets[i].z -= 0.1;
+    spaceship.bullets[i].z += (spaceship.isHostile)? 0.1 : -0.1;
   }
 }
 
-void transformOpponentBullets() {
-  for (unsigned char i = 0; i < opponent.bullets.size(); i++) {
-    // TODO: remove out-of-bounds bullet objects
-    opponent.bullets[i].z += 0.05;
+void shootBlankOrLiveBullet(Spaceship &spaceship) {
+  if(spaceship.firingDelay++ == 200) {
+    spaceship.bullets.push_back(Coordinates(spaceship.coordinates->x, spaceship.coordinates->y, spaceship.coordinates->z));
+    spaceship.firingDelay = 0;
   }
-
-  if(opponent.firingDelay++ == 200) {
-    Coordinates newCoordinates(opponent.coordinates->x, opponent.coordinates->y, opponent.coordinates->z);
-    opponent.bullets.push_back(newCoordinates);
-    opponent.firingDelay = 0;
-  }
-}
-
-// DISPLAY & ANIMATION
-
-void display() {
-  setupLights(player.coordinates->x, player.coordinates->y, player.coordinates->z);
-  setupCamera();
-
-  drawSpaceship(0.7, player);
-  drawSpaceship(0.7, opponent);
-
-  drawSpaceshipBullets(player);
-  drawSpaceshipBullets(opponent);
-
-  glFlush();
-}
-
-void animation() {
-  transformOpponent(opponent);
-  transformPlayerBullets();
-  transformOpponentBullets();
-
-  glutPostRedisplay();
 }
 
 // MAIN
