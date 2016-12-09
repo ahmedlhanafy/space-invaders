@@ -47,7 +47,7 @@ int WINDOW_POSITION_Y = 150;
 
 vector<Coordinates> playerBullets;
 vector<Coordinates> opponentBullets;
-GLuint tex;
+GLTexture tex;
 
 Coordinates observedCoordinates(0, 0, 0);
 Coordinates observerCoordinates(0, 3, 5);
@@ -86,7 +86,7 @@ void animation() {
 
 void LoadAssets()
 {
-	loadBMP(&tex, "sky4-jpg.bmp", true);
+	tex.Load("sky4-jpg.bmp"); // Loads a bitmap
 }
 
 // HANDLERS
@@ -144,7 +144,7 @@ void specialKeyboardUpHandler(int k, int x, int y) {
 
 void drawSpaceship(float length, Spaceship &spaceship) {
   glPushMatrix();
-  glTranslated(spaceship.coordinates->x, spaceship.coordinates->y, spaceship.coordinates->z);
+  glTranslated(spaceship.coordinates->x, spaceship.coordinates->y , spaceship.coordinates->z);
   glRotated(spaceship.rotation->angle, 0, 0, -1);
   glutSolidCube(length);
   glPopMatrix();
@@ -170,14 +170,13 @@ void drawSkybox() {
 	qobj = gluNewQuadric();
 	glTranslated(50,0,0);
 	glRotated(90,1,0,1);
-	glBindTexture(GL_TEXTURE_2D, tex);
+	tex.Use();	
 	gluQuadricTexture(qobj,true);
 	gluQuadricNormals(qobj,GL_SMOOTH);
 	gluSphere(qobj,100,100,100);
 	gluDeleteQuadric(qobj);
 	
 	glPopMatrix();
-	glutSwapBuffers();
 }
 
 // TRANSFORMATIONS
@@ -238,7 +237,7 @@ void setupLights(float playerx, float playery, float playerz) {
 	GLfloat mat_ambient[] = { 0.4f, 0.4, 0.4, 1.0f };
 	GLfloat mat_diffuse[] = { 0.5f, 0.5f, 0.5, 1.0f };
 	GLfloat mat_specular[] = { 0.6f, 0.6f, 0.6, 1.0f };
-	GLfloat mat_shininess[] = { 20 };
+	GLfloat mat_shininess[] = { 70 };
 	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, mat_ambient);
 	glMaterialfv(GL_FRONT, GL_DIFFUSE, mat_diffuse);
 	glMaterialfv(GL_FRONT, GL_SPECULAR, mat_specular);
@@ -262,12 +261,18 @@ void setupLights(float playerx, float playery, float playerz) {
 	glLightf(GL_LIGHT1, GL_SPOT_EXPONENT, 2.0);
 	glLightfv(GL_LIGHT1, GL_SPOT_DIRECTION, l1Direction);
 
-	GLfloat lightIntensity[] = { 0.2f, 0.2f, 0.2, 1.0f };
-	GLfloat light_position[] = { 0.0f,4.0f,2.0f,0.0f };
-	GLfloat light_direction[] = { 0, -1, 0.5, 0 };
+	GLfloat lightIntensity[] = { 0.9f, 0.9f, 0.9f, 1.0f };
+	GLfloat light_position[] = { 0.0f,-10.0f,0.0f,0 };
+	GLfloat light_direction[] = { 0, 1, 0, 0 };
 	glLightfv(GL_LIGHT2, GL_POSITION, light_position);
 	glLightfv(GL_LIGHT2, GL_DIFFUSE, lightIntensity);
 	glLightfv(GL_LIGHT2, GL_SPOT_DIRECTION, light_direction);
+	
+	GLfloat light_position_1[] = { 0.0f,10.0f,0.0f,0.0f };
+	GLfloat light_direction_1[] = { 0, -1, 0, 0 };
+	glLightfv(GL_LIGHT3, GL_POSITION, light_position_1);
+	glLightfv(GL_LIGHT3, GL_DIFFUSE, lightIntensity);
+	glLightfv(GL_LIGHT3, GL_SPOT_DIRECTION, light_direction_1);
 }
 
 // MAIN
@@ -290,6 +295,7 @@ int main(int argc, char** argv) {
   glEnable(GL_LIGHT0);
   glEnable(GL_LIGHT1);
   glEnable(GL_LIGHT2);
+  glEnable(GL_LIGHT3);
   glEnable(GL_NORMALIZE);
   glEnable(GL_COLOR_MATERIAL);
   glShadeModel(GL_SMOOTH);
