@@ -84,6 +84,11 @@ void animation() {
   glutPostRedisplay();
 }
 
+void LoadAssets()
+{
+	loadBMP(&tex, "sky4-jpg.bmp", true);
+}
+
 // HANDLERS
 
 void mouseHandler(int x, int y) {
@@ -172,6 +177,7 @@ void drawSkybox() {
 	gluDeleteQuadric(qobj);
 	
 	glPopMatrix();
+	glutSwapBuffers();
 }
 
 // TRANSFORMATIONS
@@ -226,13 +232,13 @@ void setupCamera() {
 }
 
 void setupLights(float playerx, float playery, float playerz) {
-  GLfloat lmodel_ambient[] = { 0.1f, 0.1f, 0.1f, 1.0f };
+	GLfloat lmodel_ambient[] = { 0.1f, 0.1f, 0.1f, 1.0f };
 	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, lmodel_ambient); // fv -->float vector
 
-		GLfloat mat_ambient[] = { 0.7f, 0.7, 0.7, 1.0f };
-	GLfloat mat_diffuse[] = { 0.8f, 0.8f, 0.8, 1.0f };
-	GLfloat mat_specular[] = { 0.9f, 0.9f, 0.9, 1.0f };
-	GLfloat mat_shininess[] = { 50 };
+	GLfloat mat_ambient[] = { 0.4f, 0.4, 0.4, 1.0f };
+	GLfloat mat_diffuse[] = { 0.5f, 0.5f, 0.5, 1.0f };
+	GLfloat mat_specular[] = { 0.6f, 0.6f, 0.6, 1.0f };
+	GLfloat mat_shininess[] = { 20 };
 	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, mat_ambient);
 	glMaterialfv(GL_FRONT, GL_DIFFUSE, mat_diffuse);
 	glMaterialfv(GL_FRONT, GL_SPECULAR, mat_specular);
@@ -256,9 +262,9 @@ void setupLights(float playerx, float playery, float playerz) {
 	glLightf(GL_LIGHT1, GL_SPOT_EXPONENT, 2.0);
 	glLightfv(GL_LIGHT1, GL_SPOT_DIRECTION, l1Direction);
 
-	GLfloat lightIntensity[] = { 0.5f, 0.5f, 0.5, 1.0f };
-	GLfloat light_position[] = { 7.0f,4.0f,15.0f,0.0f };
-	GLfloat light_direction[] = { 0,0,-1.0,0 };
+	GLfloat lightIntensity[] = { 0.2f, 0.2f, 0.2, 1.0f };
+	GLfloat light_position[] = { 0.0f,4.0f,2.0f,0.0f };
+	GLfloat light_direction[] = { 0, -1, 0.5, 0 };
 	glLightfv(GL_LIGHT2, GL_POSITION, light_position);
 	glLightfv(GL_LIGHT2, GL_DIFFUSE, lightIntensity);
 	glLightfv(GL_LIGHT2, GL_SPOT_DIRECTION, light_direction);
@@ -277,7 +283,7 @@ int main(int argc, char** argv) {
   glutKeyboardFunc(keyboardHandler);
   glutSpecialFunc(specialKeyboardHandler);
   glutSpecialUpFunc(specialKeyboardUpHandler);
-  glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB | GLUT_DEPTH);
+  glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
   glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
   glEnable(GL_DEPTH_TEST);
   glEnable(GL_LIGHTING);
@@ -287,6 +293,7 @@ int main(int argc, char** argv) {
   glEnable(GL_NORMALIZE);
   glEnable(GL_COLOR_MATERIAL);
   glShadeModel(GL_SMOOTH);
+  LoadAssets();
   glutFullScreen();
   glutMainLoop();
 }
