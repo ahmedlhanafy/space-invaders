@@ -48,6 +48,7 @@ int WINDOW_POSITION_Y = 150;
 vector<Coordinates> playerBullets;
 vector<Coordinates> opponentBullets;
 GLTexture tex;
+Model_3DS model_spaceship;
 
 Coordinates observedCoordinates(0, 0, 0);
 Coordinates observerCoordinates(0, 3, 5);
@@ -66,6 +67,11 @@ void display() {
 
   drawSpaceship(0.7, player);
   drawSpaceship(0.7, opponent);
+
+  glPushMatrix();
+  glScaled(0.005, 0.005, 0.005);
+  model_spaceship.Draw();
+  glPopMatrix();
 
   drawSkybox();
   drawSpaceshipBullets(player);
@@ -86,6 +92,7 @@ void animation() {
 
 void LoadAssets()
 {
+	model_spaceship.Load("player3d/fighter.3DS");
 	tex.Load("stars.bmp"); // Loads a bitmap
 }
 
@@ -179,7 +186,6 @@ void drawSkybox() {
 	
 	glPopMatrix();
 }
-
 // TRANSFORMATIONS
 
 void transformOpponent(Spaceship &spaceship) {
