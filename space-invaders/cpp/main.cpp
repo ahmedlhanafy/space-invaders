@@ -66,10 +66,12 @@ void display() {
   setupLights(player.coordinates->x, player.coordinates->y, player.coordinates->z);
   setupCamera();
 
-  drawSpaceship(0.7, player);
+  // drawSpaceship(0.7, player);
   drawSpaceship(0.7, opponent);
 
   glPushMatrix();
+  glTranslated(player.coordinates->x, player.coordinates->y, player.coordinates->z);
+  glRotated(player.rotation->angle, 0, 0, -1);
   glScaled(0.005, 0.005, 0.005);
   model_spaceship.Draw();
   glPopMatrix();
@@ -147,11 +149,13 @@ void keyboardHandler(unsigned char k, int x, int y) {
 void specialKeyboardHandler(int k, int x, int y) {
   if(k == GLUT_KEY_RIGHT) {
     player.coordinates->x += 0.1;
-    player.rotation->angle += 15;
+    if(player.rotation->angle <= 45)
+      player.rotation->angle += 15;
   }
   if(k == GLUT_KEY_LEFT) {
     player.coordinates->x -= 0.1;
-    player.rotation->angle -= 15;
+    if(player.rotation->angle >= -45)
+      player.rotation->angle -= 15;
   }
 }
 
@@ -196,13 +200,13 @@ void drawSkybox() {
 	qobj = gluNewQuadric();
 	glTranslated(50,0,0);
 	glRotated(90,1,0,1);
-	tex.Use();	
+	tex.Use();
 	gluQuadricTexture(qobj,true);
 	gluQuadricNormals(qobj,GL_SMOOTH);
 	gluSphere(qobj,100,100,100);
 	glDisable(GL_TEXTURE_2D);
 	gluDeleteQuadric(qobj);
-	
+
 	glPopMatrix();
 }
 // TRANSFORMATIONS
@@ -295,7 +299,7 @@ void setupLights(float playerx, float playery, float playerz) {
 	glLightfv(GL_LIGHT2, GL_POSITION, light_position);
 	glLightfv(GL_LIGHT2, GL_DIFFUSE, lightIntensity);
 	glLightfv(GL_LIGHT2, GL_SPOT_DIRECTION, light_direction);
-	
+
 	GLfloat light_position_1[] = { 0.0f,10.0f,0.0f,0.0f };
 	GLfloat light_direction_1[] = { 0, -1, 0, 0 };
 	glLightfv(GL_LIGHT3, GL_POSITION, light_position_1);
