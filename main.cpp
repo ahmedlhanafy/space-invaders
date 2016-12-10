@@ -32,7 +32,7 @@ void transformOpponent(Spaceship &spaceship);
 void propelSpaceshipBullets(Spaceship &spaceship);
 void shootBlankOrLiveBullet(Spaceship &spaceship);
 void detectOpponentKilled(Spaceship &player, Spaceship &opponent);
-void detectPlayerKilled(Spaceship &player, Spaceship &opponent);
+void detectSpaceshipHit(Spaceship &player, Spaceship &opponent);
 
 // FIXED CONFIGURATIONS
 
@@ -53,8 +53,6 @@ Spaceship opponent(true, 0, 0, -3, 0, 0, 0, 0);
 
 Coordinates spotlights(0, 0, 0);
 
-bool opponentDeleted = false;
-
 // DISPLAY & ANIMATION
 
 void display() {
@@ -62,12 +60,10 @@ void display() {
   setupCamera();
 
   drawSpaceship(0.7, player);
-  if(!opponentDeleted)
-    drawSpaceship(0.7, opponent);
+  drawSpaceship(0.7, opponent);
 
   drawSpaceshipBullets(player);
-  if(!opponentDeleted)
-    drawSpaceshipBullets(opponent);
+  drawSpaceshipBullets(opponent);
 
   glFlush();
 }
@@ -79,13 +75,13 @@ void animation() {
   propelSpaceshipBullets(player);
   propelSpaceshipBullets(opponent);
 
+  detectSpaceshipHit(player, opponent);
   detectOpponentKilled(player, opponent);
-  detectPlayerKilled(player, opponent);
 
   glutPostRedisplay();
 }
 
-void detectPlayerKilled(Spaceship &player, Spaceship &opponent) {
+void detectSpaceshipHit(Spaceship &player, Spaceship &opponent) {
   for (unsigned int i = 0; i < opponent.bullets.size(); i++) {
     Coordinates* playerCoordinates = player.coordinates;
     Coordinates* opponentBulletCoordinates = opponent.bullets[i].coordinates;
@@ -93,7 +89,7 @@ void detectPlayerKilled(Spaceship &player, Spaceship &opponent) {
     if((int)opponentBulletCoordinates->z == (int)playerCoordinates->z
     && playerCoordinates->x - 0.25 < opponentBulletCoordinates->x
     && playerCoordinates->x + 0.25 > opponentBulletCoordinates->x) {
-        exit(0);
+        player.isHit = true;
     }
   }
 }
@@ -106,7 +102,7 @@ void detectOpponentKilled(Spaceship &player, Spaceship &opponent) {
     if((int)playerBulletCoordinates->z == (int)opponentCoordinates->z
     && opponentCoordinates->x - 0.25 < playerBulletCoordinates->x
     && opponentCoordinates->x + 0.25 > playerBulletCoordinates->x) {
-        opponentDeleted = true;
+        opponent.isHit = true;
     }
   }
 }
@@ -165,11 +161,13 @@ void specialKeyboardUpHandler(int k, int x, int y) {
 // DRAWABLES
 
 void drawSpaceship(float length, Spaceship &spaceship) {
-  glPushMatrix();
-  glTranslated(spaceship.coordinates->x, spaceship.coordinates->y, spaceship.coordinates->z);
-  glRotated(spaceship.rotation->angle, 0, 0, -1);
-  glutSolidCube(length);
-  glPopMatrix();
+  if(!spaceship.isHit) {
+    glPushMatrix();
+    glTranslated(spaceship.coordinates->x, spaceship.coordinates->y, spaceship.coordinates->z);
+    glRotated(spaceship.rotation->angle, 0, 0, -1);
+    glutSolidCube(length);
+    glPopMatrix();
+  }
 }
 
 void drawBullet(Bullet &bullet) {
@@ -213,9 +211,11 @@ void propelSpaceshipBullets(Spaceship &spaceship) {
 }
 
 void shootBlankOrLiveBullet(Spaceship &spaceship) {
-  if(spaceship.firingDelay++ == 200) {
-    spaceship.bullets.push_back(Bullet(true, spaceship.coordinates->x, spaceship.coordinates->y, spaceship.coordinates->z));
-    spaceship.firingDelay = 0;
+  if(!spaceship.isHit) {
+    if(spaceship.firingDelay++ == 200) {
+      spaceship.bullets.push_back(Bullet(true, spaceship.coordinates->x, spaceship.coordinates->y, spaceship.coordinates->z));
+      spaceship.firingDelay = 0;
+    }
   }
 }
 
