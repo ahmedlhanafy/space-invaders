@@ -66,7 +66,7 @@ void display() {
     drawSpaceship(0.7, opponent);
 
   drawSpaceshipBullets(player);
-  if(!opponentDeleted)  
+  if(!opponentDeleted)
     drawSpaceshipBullets(opponent);
 
   glFlush();
@@ -85,28 +85,29 @@ void animation() {
   glutPostRedisplay();
 }
 
-void detectPlayerKilled(Spaceship &player, Spaceship &opponent){
+void detectPlayerKilled(Spaceship &player, Spaceship &opponent) {
   for (unsigned int i = 0; i < opponent.bullets.size(); i++) {
     Coordinates* playerCoordinates = player.coordinates;
     Coordinates* opponentBulletCoordinates = opponent.bullets[i].coordinates;
 
-    if((int)opponentBulletCoordinates->z == (int)playerCoordinates->z 
-    && playerCoordinates->x - 0.25 < opponentBulletCoordinates->x 
-    && playerCoordinates->x + 0.25 > opponentBulletCoordinates->x){
+    if((int)opponentBulletCoordinates->z == (int)playerCoordinates->z
+    && playerCoordinates->x - 0.25 < opponentBulletCoordinates->x
+    && playerCoordinates->x + 0.25 > opponentBulletCoordinates->x) {
         exit(0);
     }
-  }  
+  }
 }
 
-void detectOpponentKilled(Spaceship &player, Spaceship &opponent){
+void detectOpponentKilled(Spaceship &player, Spaceship &opponent) {
   for (unsigned int i = 0; i < player.bullets.size(); i++) {
     Coordinates* playerBulletCoordinates = player.bullets[i].coordinates;
     Coordinates* opponentCoordinates = opponent.coordinates;
-    if((int)playerBulletCoordinates->z == (int)opponentCoordinates->z 
-    && opponentCoordinates->x - 0.25 < playerBulletCoordinates->x 
-    && opponentCoordinates->x + 0.25 > playerBulletCoordinates->x){
+
+    if((int)playerBulletCoordinates->z == (int)opponentCoordinates->z
+    && opponentCoordinates->x - 0.25 < playerBulletCoordinates->x
+    && opponentCoordinates->x + 0.25 > playerBulletCoordinates->x) {
         opponentDeleted = true;
-    } 
+    }
   }
 }
 
