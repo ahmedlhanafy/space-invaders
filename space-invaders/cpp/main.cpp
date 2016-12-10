@@ -64,6 +64,8 @@ Spaceship opponent(true, 0, 0, -3, 0, 0, 0, 0);
 
 Coordinates spotlights(0, 0, 0);
 
+int score = 0;
+
 // DISPLAY & ANIMATION
 
 void display() {
@@ -91,7 +93,11 @@ void animation() {
 	  if(detectSpaceshipHit(player, opponent)) {
 		gameOver = true;
 	  }
-	  detectSpaceshipHit(opponent, player);
+
+	 if(detectSpaceshipHit(opponent, player)){
+		score++;
+		printf("%d\n", score);
+	 }
 	}
 
 	  propelSpaceshipBullets(player);
@@ -110,6 +116,7 @@ bool detectSpaceshipHit(Spaceship &spaceship1, Spaceship &spaceship2) {
 		&& spaceship1Coordinates->x - 0.25 < player2BulletCoordinates->x
 		&& spaceship1Coordinates->x + 0.25 > player2BulletCoordinates->x) {
 			spaceship1.isHit = true;
+			spaceship1.coordinates = new Coordinates(-100, -100, -100);
 			return true;
 		}
 	}
