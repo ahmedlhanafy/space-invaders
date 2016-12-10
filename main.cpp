@@ -86,7 +86,7 @@ void animation() {
 
 void LoadAssets()
 {
-	tex.Load("sky4-jpg.bmp"); // Loads a bitmap
+	tex.Load("stars.bmp"); // Loads a bitmap
 }
 
 // HANDLERS
@@ -174,6 +174,7 @@ void drawSkybox() {
 	gluQuadricTexture(qobj,true);
 	gluQuadricNormals(qobj,GL_SMOOTH);
 	gluSphere(qobj,100,100,100);
+	glDisable(GL_TEXTURE_2D);
 	gluDeleteQuadric(qobj);
 	
 	glPopMatrix();
@@ -236,8 +237,8 @@ void setupLights(float playerx, float playery, float playerz) {
 
 	GLfloat mat_ambient[] = { 0.4f, 0.4, 0.4, 1.0f };
 	GLfloat mat_diffuse[] = { 0.5f, 0.5f, 0.5, 1.0f };
-	GLfloat mat_specular[] = { 0.6f, 0.6f, 0.6, 1.0f };
-	GLfloat mat_shininess[] = { 70 };
+	GLfloat mat_specular[] = { 0.6f, 0.6, 0.6, 1.0f };
+	GLfloat mat_shininess[] = { 50 };
 	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, mat_ambient);
 	glMaterialfv(GL_FRONT, GL_DIFFUSE, mat_diffuse);
 	glMaterialfv(GL_FRONT, GL_SPECULAR, mat_specular);
@@ -261,7 +262,7 @@ void setupLights(float playerx, float playery, float playerz) {
 	glLightf(GL_LIGHT1, GL_SPOT_EXPONENT, 2.0);
 	glLightfv(GL_LIGHT1, GL_SPOT_DIRECTION, l1Direction);
 
-	GLfloat lightIntensity[] = { 0.9f, 0.9f, 0.9f, 1.0f };
+	GLfloat lightIntensity[] = { 0.5f, 0.5f, 0.5f, 1.0f };
 	GLfloat light_position[] = { 0.0f,-10.0f,0.0f,0 };
 	GLfloat light_direction[] = { 0, 1, 0, 0 };
 	glLightfv(GL_LIGHT2, GL_POSITION, light_position);
