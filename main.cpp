@@ -31,7 +31,6 @@ void drawSpaceshipBullets(Spaceship &spaceship);
 void transformOpponent(Spaceship &spaceship);
 void propelSpaceshipBullets(Spaceship &spaceship);
 void shootBlankOrLiveBullet(Spaceship &spaceship);
-void detectOpponentKilled(Spaceship &player, Spaceship &opponent);
 void detectSpaceshipHit(Spaceship &player, Spaceship &opponent);
 
 // FIXED CONFIGURATIONS
@@ -76,33 +75,21 @@ void animation() {
   propelSpaceshipBullets(opponent);
 
   detectSpaceshipHit(player, opponent);
-  detectOpponentKilled(player, opponent);
+  detectSpaceshipHit(opponent, player);
 
   glutPostRedisplay();
 }
 
-void detectSpaceshipHit(Spaceship &player, Spaceship &opponent) {
-  for (unsigned int i = 0; i < opponent.bullets.size(); i++) {
-    Coordinates* playerCoordinates = player.coordinates;
-    Coordinates* opponentBulletCoordinates = opponent.bullets[i].coordinates;
+void detectSpaceshipHit(Spaceship &spaceship1, Spaceship &spaceship2) {
+  for (unsigned int i = 0; i < spaceship2.bullets.size(); i++) {
+    Coordinates* spaceship1Coordinates = spaceship1.coordinates;
+    Coordinates* player2BulletCoordinates = spaceship2.bullets[i].coordinates;
 
-    if((int)opponentBulletCoordinates->z == (int)playerCoordinates->z
-    && playerCoordinates->x - 0.25 < opponentBulletCoordinates->x
-    && playerCoordinates->x + 0.25 > opponentBulletCoordinates->x) {
-        player.isHit = true;
-    }
-  }
-}
-
-void detectOpponentKilled(Spaceship &player, Spaceship &opponent) {
-  for (unsigned int i = 0; i < player.bullets.size(); i++) {
-    Coordinates* playerBulletCoordinates = player.bullets[i].coordinates;
-    Coordinates* opponentCoordinates = opponent.coordinates;
-
-    if((int)playerBulletCoordinates->z == (int)opponentCoordinates->z
-    && opponentCoordinates->x - 0.25 < playerBulletCoordinates->x
-    && opponentCoordinates->x + 0.25 > playerBulletCoordinates->x) {
-        opponent.isHit = true;
+    // TODO: Make dimensions dynamic
+    if((int)player2BulletCoordinates->z == (int)spaceship1Coordinates->z
+    && spaceship1Coordinates->x - 0.25 < player2BulletCoordinates->x
+    && spaceship1Coordinates->x + 0.25 > player2BulletCoordinates->x) {
+        spaceship1.isHit = true;
     }
   }
 }
