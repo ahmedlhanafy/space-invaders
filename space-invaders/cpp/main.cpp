@@ -110,7 +110,7 @@ void detectSpaceshipHit(Spaceship &spaceship1, Spaceship &spaceship2) {
 void LoadAssets() {
 	model_spaceship_player.Load("models/player3d/fighter.3DS");
 	model_spaceship_opponent.Load("models/opponent3d/fighter.3DS");
-	model_bullet.Load("models/bullet3d/bullet.3DS");
+	model_bullet.Load("models/bullet3d/Bullet.3DS");
 	tex.Load("img/stars.bmp"); // Loads a bitmap
 }
 
@@ -194,7 +194,7 @@ void drawPlayerSpaceship(Spaceship &spaceship) {
 void drawBullet(Bullet &bullet) {
   glPushMatrix();
   glTranslated(bullet.coordinates->x, bullet.coordinates->y, bullet.coordinates->z);
-  glScaled(0.1, 0.1, 0.1);
+  glScaled(0.001, 0.001, 0.001);
   glRotated(bullet.rotation->angle, bullet.rotation->x, bullet.rotation->y, bullet.rotation->z);
   model_bullet.Draw();
   glPopMatrix();
@@ -247,11 +247,11 @@ void propelSpaceshipBullets(Spaceship &spaceship) {
 		if(spaceship.isHostile) {
 			spaceship.bullets[i].coordinates->z += 0.01;
 			spaceship.bullets[i].rotation->angle = 90;
-			spaceship.bullets[i].rotation->x = 1;
+			spaceship.bullets[i].rotation->y = -1;
 		} else {
 			spaceship.bullets[i].coordinates->z -= 0.01;
 			spaceship.bullets[i].rotation->angle = 90;
-			spaceship.bullets[i].rotation->x = -1;
+			spaceship.bullets[i].rotation->y = 1;
 		}
     }
   }
