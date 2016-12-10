@@ -50,7 +50,8 @@ int WINDOW_POSITION_Y = 150;
 vector<Coordinates> playerBullets;
 vector<Coordinates> opponentBullets;
 GLTexture tex;
-Model_3DS model_spaceship;
+Model_3DS model_spaceship_player;
+Model_3DS model_spaceship_opponent;
 
 Coordinates observedCoordinates(0, 0, 0);
 Coordinates observerCoordinates(0, 3, 5);
@@ -106,7 +107,8 @@ void detectSpaceshipHit(Spaceship &spaceship1, Spaceship &spaceship2) {
 }
 
 void LoadAssets() {
-	model_spaceship.Load("models/player3d/fighter.3DS");
+	model_spaceship_player.Load("models/player3d/fighter.3DS");
+	model_spaceship_opponent.Load("models/opponent3d/fighter.3DS");
 	tex.Load("img/stars.bmp"); // Loads a bitmap
 }
 
@@ -169,10 +171,9 @@ void drawOpponentSpaceship(Spaceship &spaceship) {
   if(!spaceship.isHit) {
     glPushMatrix();
     glTranslated(spaceship.coordinates->x, spaceship.coordinates->y, spaceship.coordinates->z);
-    glRotated(spaceship.rotation->angle, 0, 0, -1);
-    glRotated(180, 0,1,0);
-    glScaled(0.005, 0.005, 0.005);
-    model_spaceship.Draw();
+    glRotated(90, 0,-1,0);
+    glScaled(0.02, 0.02, 0.02);
+    model_spaceship_opponent.Draw();
     glPopMatrix();
   }
 }
@@ -182,8 +183,8 @@ void drawPlayerSpaceship(Spaceship &spaceship) {
     glPushMatrix();
     glTranslated(spaceship.coordinates->x, spaceship.coordinates->y, spaceship.coordinates->z);
     glRotated(spaceship.rotation->angle, 0, 0, -1);
-    glScaled(0.005, 0.005, 0.005);
-    model_spaceship.Draw();
+    glScaled(0.002, 0.002, 0.002);
+    model_spaceship_player.Draw();
     glPopMatrix();
   }
 }
