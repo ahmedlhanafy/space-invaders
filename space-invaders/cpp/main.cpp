@@ -52,6 +52,7 @@ vector<Coordinates> opponentBullets;
 GLTexture tex;
 Model_3DS model_spaceship_player;
 Model_3DS model_spaceship_opponent;
+Model_3DS model_bullet;
 
 Coordinates observedCoordinates(0, 0, 0);
 Coordinates observerCoordinates(0, 3, 5);
@@ -109,6 +110,7 @@ void detectSpaceshipHit(Spaceship &spaceship1, Spaceship &spaceship2) {
 void LoadAssets() {
 	model_spaceship_player.Load("models/player3d/fighter.3DS");
 	model_spaceship_opponent.Load("models/opponent3d/fighter.3DS");
+	model_bullet.Load("models/bullet3d/bullet.3DS");
 	tex.Load("img/stars.bmp"); // Loads a bitmap
 }
 
@@ -192,8 +194,11 @@ void drawPlayerSpaceship(Spaceship &spaceship) {
 void drawBullet(Bullet &bullet) {
   glPushMatrix();
   glTranslated(bullet.coordinates->x, bullet.coordinates->y, bullet.coordinates->z);
-  glutSolidCube(0.2);
+  glScaled(0.1, 0.1, 0.1);
+  glRotated(bullet.rotation->angle, bullet.rotation->x, bullet.rotation->y, bullet.rotation->z);
+  model_bullet.Draw();
   glPopMatrix();
+
 }
 
 void drawSpaceshipBullets(Spaceship &spaceship) {
@@ -239,7 +244,15 @@ void transformOpponent(Spaceship &spaceship) {
 void propelSpaceshipBullets(Spaceship &spaceship) {
   for (unsigned int i = 0; i < spaceship.bullets.size(); i++) {
     if(spaceship.bullets[i].isAirborne) {
-      spaceship.bullets[i].coordinates->z += (spaceship.isHostile)? 0.1 : -0.1;
+		if(spaceship.isHostile) {
+			spaceship.bullets[i].coordinates->z += 0.01;
+			spaceship.bullets[i].rotation->angle = 90;
+			spaceship.bullets[i].rotation->x = 1;
+		} else {
+			spaceship.bullets[i].coordinates->z -= 0.01;
+			spaceship.bullets[i].rotation->angle = 90;
+			spaceship.bullets[i].rotation->x = -1;
+		}
     }
   }
 }
