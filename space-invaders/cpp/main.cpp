@@ -34,7 +34,7 @@ void drawSpaceshipBullets(Spaceship &spaceship);
 void transformOpponent(Spaceship &spaceship);
 void propelSpaceshipBullets(Spaceship &spaceship);
 void shootBlankOrLiveBullet(Spaceship &spaceship);
-void detectSpaceshipHit(Spaceship &player, Spaceship &opponent);
+bool detectSpaceshipHit(Spaceship &player, Spaceship &opponent);
 void drawSkybox();
 
 // FIXED CONFIGURATIONS
@@ -53,6 +53,7 @@ GLTexture tex;
 Model_3DS model_spaceship_player;
 Model_3DS model_spaceship_opponent;
 Model_3DS model_bullet;
+bool gameOver;
 
 Coordinates observedCoordinates(0, 0, 0);
 Coordinates observerCoordinates(0, 3, 5);
@@ -81,19 +82,25 @@ void display() {
 }
 
 void animation() {
-  transformOpponent(opponent);
-  shootBlankOrLiveBullet(opponent);
+  
+	if(!gameOver){
+		
+	transformOpponent(opponent);
+	  shootBlankOrLiveBullet(opponent);
 
-  propelSpaceshipBullets(player);
-  propelSpaceshipBullets(opponent);
+	  if(detectSpaceshipHit(player, opponent)) {
+		gameOver = true;
+	  }
+	  detectSpaceshipHit(opponent, player);
+	}
 
-  detectSpaceshipHit(player, opponent);
-  detectSpaceshipHit(opponent, player);
+		  propelSpaceshipBullets(player);
+	  propelSpaceshipBullets(opponent);
 
   glutPostRedisplay();
 }
 
-void detectSpaceshipHit(Spaceship &spaceship1, Spaceship &spaceship2) {
+bool detectSpaceshipHit(Spaceship &spaceship1, Spaceship &spaceship2) {
 	for (unsigned int i = 0; i < spaceship2.bullets.size(); i++) {
 		Coordinates* spaceship1Coordinates = spaceship1.coordinates;
 		Coordinates* player2BulletCoordinates = spaceship2.bullets[i].coordinates;
@@ -103,8 +110,11 @@ void detectSpaceshipHit(Spaceship &spaceship1, Spaceship &spaceship2) {
 		&& spaceship1Coordinates->x - 0.25 < player2BulletCoordinates->x
 		&& spaceship1Coordinates->x + 0.25 > player2BulletCoordinates->x) {
 			spaceship1.isHit = true;
+			return true;
 		}
 	}
+
+	return false;
 }
 
 void LoadAssets() {
@@ -141,24 +151,23 @@ void keyboardHandler(unsigned char k, int x, int y) {
   if(k == ' ') {
     player.bullets.push_back(Bullet(true, player.coordinates->x, player.coordinates->y, player.coordinates->z));
   }
-  if(k == 'n') {
-    player.isHit = false;
-  }
 
   glutPostRedisplay();
 }
 
 void specialKeyboardHandler(int k, int x, int y) {
-  if(k == GLUT_KEY_RIGHT) {
-    player.coordinates->x += 0.1;
-    if(player.rotation->angle <= 45)
-      player.rotation->angle += 15;
-  }
-  if(k == GLUT_KEY_LEFT) {
-    player.coordinates->x -= 0.1;
-    if(player.rotation->angle >= -45)
-      player.rotation->angle -= 15;
-  }
+	if(!gameOver) {
+	  if(k == GLUT_KEY_RIGHT) {
+		player.coordinates->x += 0.1;
+		if(player.rotation->angle <= 45)
+		  player.rotation->angle += 15;
+	  }
+	  if(k == GLUT_KEY_LEFT) {
+		player.coordinates->x -= 0.1;
+		if(player.rotation->angle >= -45)
+		  player.rotation->angle -= 15;
+	  }
+	}
 }
 
 void specialKeyboardUpHandler(int k, int x, int y) {
@@ -184,14 +193,12 @@ void drawOpponentSpaceship(Spaceship &spaceship) {
 }
 
 void drawPlayerSpaceship(Spaceship &spaceship) {
-  if(!spaceship.isHit) {
     glPushMatrix();
     glTranslated(spaceship.coordinates->x, spaceship.coordinates->y, spaceship.coordinates->z);
     glRotated(spaceship.rotation->angle, 0, 0, -1);
     glScaled(0.002, 0.002, 0.002);
     model_spaceship_player.Draw();
     glPopMatrix();
-  }
 }
 
 void drawBullet(Bullet &bullet) {
