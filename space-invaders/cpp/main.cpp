@@ -141,6 +141,9 @@ void keyboardHandler(unsigned char k, int x, int y) {
   if(k == ' ') {
     player.bullets.push_back(Bullet(true, player.coordinates->x, player.coordinates->y, player.coordinates->z));
   }
+  if(k == 'n') {
+    player.isHit = false;
+  }
 
   glutPostRedisplay();
 }
@@ -297,7 +300,7 @@ void setupLights(float playerx, float playery, float playerz) {
 	glMaterialfv(GL_FRONT, GL_SHININESS, mat_shininess);
 
 	GLfloat l0Diffuse[] = { 1.0, 1.0f, 1.0f, 1.0f };
-	GLfloat l0Position[] = { playerx - 0.45, playery + 0.45, playerz - 0.45, 1 };
+	GLfloat l0Position[] = { playerx - 1, playery + 1, playerz, 1 };
 	GLfloat l0Direction[] = { 0.0, 0.0, -1.0 };
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, l0Diffuse);
 	glLightfv(GL_LIGHT0, GL_POSITION, l0Position);
@@ -306,7 +309,7 @@ void setupLights(float playerx, float playery, float playerz) {
 	glLightfv(GL_LIGHT0, GL_SPOT_DIRECTION, l0Direction);
 
 	GLfloat l1Diffuse[] = { 1.0f, 1.0f, 1.0f, 1.0f };
-	GLfloat l1Position[] = { playerx + 0.45, playery + 0.45, playerz - 0.45, 1};//s homogeneous bit (sunlight 0 vs. spotlight 1 ) differene in ambient (fading/ non fading)
+	GLfloat l1Position[] = { playerx + 1, playery + 1, playerz, 1};//s homogeneous bit (sunlight 0 vs. spotlight 1 ) differene in ambient (fading/ non fading)
 	GLfloat l1Direction[] = { 0.0, 0.0, -1.0 };
 	glLightfv(GL_LIGHT1, GL_DIFFUSE, l1Diffuse);
 	glLightfv(GL_LIGHT1, GL_POSITION, l1Position);// vector
