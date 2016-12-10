@@ -1,2 +1,9 @@
 main
-
+space-invaders.suo
+*.opensdf
+space-invaders/Debug/*
+ipch/
+space-invaders.sdf
+Debug/space-invaders.exe 
+Debug/space-invaders.ilk
+Debug/space-invaders.pdb
