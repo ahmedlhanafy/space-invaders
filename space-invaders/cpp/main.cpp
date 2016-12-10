@@ -31,11 +31,12 @@ void drawPlayerSpaceship(Spaceship &spaceship);
 void drawOpponentSpaceship(Spaceship &spaceship);
 void drawBullet(Bullet &bullet);
 void drawSpaceshipBullets(Spaceship &spaceship);
-void transformOpponent(Spaceship &spaceship);
+void transformOpponent(Spaceship &spaceship,int randomNumber);
 void propelSpaceshipBullets(Spaceship &spaceship);
 void shootBlankOrLiveBullet(Spaceship &spaceship);
 void detectSpaceshipHit(Spaceship &player, Spaceship &opponent);
 void drawSkybox();
+vector<Spaceship> initializeOpponents(int opponentsCount);
 
 // FIXED CONFIGURATIONS
 
@@ -45,19 +46,20 @@ int WINDOW_HEIGHT = 700;
 int WINDOW_POSITION_X = 150;
 int WINDOW_POSITION_Y = 150;
 
-// VARIABLE CONFIGURATIONS
+int OPPONENTS_COUNT = 30;
 
-vector<Coordinates> playerBullets;
-vector<Coordinates> opponentBullets;
+// VARIABLE CONFIGURATIONS
 GLTexture tex;
-Model_3DS model_spaceship;
+Model_3DS model_spaceship_player;
+Model_3DS model_spaceship_opponent;
+Model_3DS model_bullet;
 
 Coordinates observedCoordinates(0, 0, 0);
 Coordinates observerCoordinates(0, 3, 5);
 Coordinates mouseCoordinates(0, 0, 0);
 
 Spaceship player(false, 0, 0, 2.5, 0, 0, 0, 0);
-Spaceship opponent(true, 0, 0, -3, 0, 0, 0, 0);
+vector<Spaceship> opponents;
 
 Coordinates spotlights(0, 0, 0);
 
@@ -68,25 +70,27 @@ void display() {
   setupCamera();
 
   drawPlayerSpaceship(player);
-  drawOpponentSpaceship(opponent);
-
+  drawSpaceshipBullets(player);
   drawSkybox();
 
-  drawSpaceshipBullets(player);
-  drawSpaceshipBullets(opponent);
+  for (unsigned int i = 0; i < opponents.size(); i++) {
+    drawOpponentSpaceship(opponents[i]);
+    drawSpaceshipBullets(opponents[i]);
+  }
 
   glFlush();
 }
 
 void animation() {
-  transformOpponent(opponent);
-  shootBlankOrLiveBullet(opponent);
+  for (unsigned int i = 0; i < opponents.size(); i++) {
+    transformOpponent(opponents[i], i);
+    shootBlankOrLiveBullet(opponents[i]);
+    propelSpaceshipBullets(opponents[i]);
+    detectSpaceshipHit(player, opponents[i]);
+    detectSpaceshipHit(opponents[i], player);
+	}
 
   propelSpaceshipBullets(player);
-  propelSpaceshipBullets(opponent);
-
-  detectSpaceshipHit(player, opponent);
-  detectSpaceshipHit(opponent, player);
 
   glutPostRedisplay();
 }
@@ -106,7 +110,9 @@ void detectSpaceshipHit(Spaceship &spaceship1, Spaceship &spaceship2) {
 }
 
 void LoadAssets() {
-	model_spaceship.Load("models/player3d/fighter.3DS");
+	model_spaceship_player.Load("models/player3d/fighter.3DS");
+	model_spaceship_opponent.Load("models/opponent3d/fighter.3DS");
+	model_bullet.Load("models/bullet3d/Bullet.3DS");
 	tex.Load("img/stars.bmp"); // Loads a bitmap
 }
 
@@ -136,6 +142,9 @@ void keyboardHandler(unsigned char k, int x, int y) {
       observerCoordinates.x++;
   if(k == ' ') {
     player.bullets.push_back(Bullet(true, player.coordinates->x, player.coordinates->y, player.coordinates->z));
+  }
+  if(k == 'n') {
+    player.isHit = false;
   }
 
   glutPostRedisplay();
@@ -169,10 +178,9 @@ void drawOpponentSpaceship(Spaceship &spaceship) {
   if(!spaceship.isHit) {
     glPushMatrix();
     glTranslated(spaceship.coordinates->x, spaceship.coordinates->y, spaceship.coordinates->z);
-    glRotated(spaceship.rotation->angle, 0, 0, -1);
-    glRotated(180, 0,1,0);
-    glScaled(0.005, 0.005, 0.005);
-    model_spaceship.Draw();
+    glRotated(90, 0,-1,0);
+    glScaled(0.02, 0.02, 0.02);
+    model_spaceship_opponent.Draw();
     glPopMatrix();
   }
 }
@@ -182,8 +190,8 @@ void drawPlayerSpaceship(Spaceship &spaceship) {
     glPushMatrix();
     glTranslated(spaceship.coordinates->x, spaceship.coordinates->y, spaceship.coordinates->z);
     glRotated(spaceship.rotation->angle, 0, 0, -1);
-    glScaled(0.005, 0.005, 0.005);
-    model_spaceship.Draw();
+    glScaled(0.002, 0.002, 0.002);
+    model_spaceship_player.Draw();
     glPopMatrix();
   }
 }
@@ -191,8 +199,11 @@ void drawPlayerSpaceship(Spaceship &spaceship) {
 void drawBullet(Bullet &bullet) {
   glPushMatrix();
   glTranslated(bullet.coordinates->x, bullet.coordinates->y, bullet.coordinates->z);
-  glutSolidCube(0.2);
+  glScaled(0.001, 0.001, 0.001);
+  glRotated(bullet.rotation->angle, bullet.rotation->x, bullet.rotation->y, bullet.rotation->z);
+  model_bullet.Draw();
   glPopMatrix();
+
 }
 
 void drawSpaceshipBullets(Spaceship &spaceship) {
@@ -218,13 +229,13 @@ void drawSkybox() {
 }
 // TRANSFORMATIONS
 
-void transformOpponent(Spaceship &spaceship) {
-  srand(time(NULL));
+void transformOpponent(Spaceship &spaceship, int randomNumber) {
+  srand(time(0));
 
-  if(rand() % 2 == 0) {
-      spaceship.coordinates->x += 0.01;
+  if(rand() % (OPPONENTS_COUNT-0 + 1) + 0 == randomNumber) {
+      spaceship.coordinates->x += 0.02;
   } else {
-    spaceship.coordinates->x -= 0.01;
+    spaceship.coordinates->x -= 0.02;
   }
 
   if(spaceship.coordinates->x > 3.5) {
@@ -238,7 +249,15 @@ void transformOpponent(Spaceship &spaceship) {
 void propelSpaceshipBullets(Spaceship &spaceship) {
   for (unsigned int i = 0; i < spaceship.bullets.size(); i++) {
     if(spaceship.bullets[i].isAirborne) {
-      spaceship.bullets[i].coordinates->z += (spaceship.isHostile)? 0.1 : -0.1;
+		if(spaceship.isHostile) {
+			spaceship.bullets[i].coordinates->z += 0.01;
+			spaceship.bullets[i].rotation->angle = 90;
+			spaceship.bullets[i].rotation->y = -1;
+		} else {
+			spaceship.bullets[i].coordinates->z -= 0.01;
+			spaceship.bullets[i].rotation->angle = 90;
+			spaceship.bullets[i].rotation->y = 1;
+		}
     }
   }
 }
@@ -283,7 +302,7 @@ void setupLights(float playerx, float playery, float playerz) {
 	glMaterialfv(GL_FRONT, GL_SHININESS, mat_shininess);
 
 	GLfloat l0Diffuse[] = { 1.0, 1.0f, 1.0f, 1.0f };
-	GLfloat l0Position[] = { playerx - 0.45, playery + 0.45, playerz - 0.45, 1 };
+	GLfloat l0Position[] = { playerx - 1, playery + 1, playerz, 1 };
 	GLfloat l0Direction[] = { 0.0, 0.0, -1.0 };
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, l0Diffuse);
 	glLightfv(GL_LIGHT0, GL_POSITION, l0Position);
@@ -292,7 +311,7 @@ void setupLights(float playerx, float playery, float playerz) {
 	glLightfv(GL_LIGHT0, GL_SPOT_DIRECTION, l0Direction);
 
 	GLfloat l1Diffuse[] = { 1.0f, 1.0f, 1.0f, 1.0f };
-	GLfloat l1Position[] = { playerx + 0.45, playery + 0.45, playerz - 0.45, 1};//s homogeneous bit (sunlight 0 vs. spotlight 1 ) differene in ambient (fading/ non fading)
+	GLfloat l1Position[] = { playerx + 1, playery + 1, playerz, 1};//s homogeneous bit (sunlight 0 vs. spotlight 1 ) differene in ambient (fading/ non fading)
 	GLfloat l1Direction[] = { 0.0, 0.0, -1.0 };
 	glLightfv(GL_LIGHT1, GL_DIFFUSE, l1Diffuse);
 	glLightfv(GL_LIGHT1, GL_POSITION, l1Position);// vector
@@ -314,9 +333,18 @@ void setupLights(float playerx, float playery, float playerz) {
 	glLightfv(GL_LIGHT3, GL_SPOT_DIRECTION, light_direction_1);
 }
 
+vector<Spaceship> initializeOpponents(int opponentsCount){
+  vector<Spaceship> opponents;
+  for (unsigned int i = 0; i < OPPONENTS_COUNT; i++) {
+    opponents.push_back(Spaceship(true, i / 0.1, 0, i %2 == 0? -3: -1, 0, 0, 0, 0));
+  }
+  return opponents;
+}
+
 // MAIN
 
 int main(int argc, char** argv) {
+  opponents = initializeOpponents(OPPONENTS_COUNT);
   glutInit(&argc, argv);
   glutInitWindowSize(WINDOW_WIDTH, WINDOW_HEIGHT);
   glutInitWindowPosition(WINDOW_POSITION_X, WINDOW_POSITION_Y);

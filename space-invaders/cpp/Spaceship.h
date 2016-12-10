@@ -13,4 +13,6 @@ Spaceship::Spaceship(bool isHostile, float tx, float ty, float tz, float angle, 
     this->isHostile = isHostile;
     this->coordinates = new Coordinates(tx, ty, tz);
     this->rotation = new Rotation(angle, rx, ry, rz);
+    this->isHit = false;
+    this->firingDelay = 0;
 }
