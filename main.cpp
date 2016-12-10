@@ -31,6 +31,7 @@ void drawSpaceshipBullets(Spaceship &spaceship);
 void transformOpponent(Spaceship &spaceship);
 void propelSpaceshipBullets(Spaceship &spaceship);
 void shootBlankOrLiveBullet(Spaceship &spaceship);
+void detectSpaceshipHit(Spaceship &player, Spaceship &opponent);
 
 // FIXED CONFIGURATIONS
 
@@ -73,7 +74,24 @@ void animation() {
   propelSpaceshipBullets(player);
   propelSpaceshipBullets(opponent);
 
+  detectSpaceshipHit(player, opponent);
+  detectSpaceshipHit(opponent, player);
+
   glutPostRedisplay();
+}
+
+void detectSpaceshipHit(Spaceship &spaceship1, Spaceship &spaceship2) {
+  for (unsigned int i = 0; i < spaceship2.bullets.size(); i++) {
+    Coordinates* spaceship1Coordinates = spaceship1.coordinates;
+    Coordinates* player2BulletCoordinates = spaceship2.bullets[i].coordinates;
+
+    // TODO: Make dimensions dynamic
+    if((int)player2BulletCoordinates->z == (int)spaceship1Coordinates->z
+    && spaceship1Coordinates->x - 0.25 < player2BulletCoordinates->x
+    && spaceship1Coordinates->x + 0.25 > player2BulletCoordinates->x) {
+        spaceship1.isHit = true;
+    }
+  }
 }
 
 // HANDLERS
@@ -130,11 +148,13 @@ void specialKeyboardUpHandler(int k, int x, int y) {
 // DRAWABLES
 
 void drawSpaceship(float length, Spaceship &spaceship) {
-  glPushMatrix();
-  glTranslated(spaceship.coordinates->x, spaceship.coordinates->y, spaceship.coordinates->z);
-  glRotated(spaceship.rotation->angle, 0, 0, -1);
-  glutSolidCube(length);
-  glPopMatrix();
+  if(!spaceship.isHit) {
+    glPushMatrix();
+    glTranslated(spaceship.coordinates->x, spaceship.coordinates->y, spaceship.coordinates->z);
+    glRotated(spaceship.rotation->angle, 0, 0, -1);
+    glutSolidCube(length);
+    glPopMatrix();
+  }
 }
 
 void drawBullet(Bullet &bullet) {
@@ -156,9 +176,9 @@ void transformOpponent(Spaceship &spaceship) {
   srand(time(NULL));
 
   if(rand() % 2 == 0) {
-      spaceship.coordinates->x += 0.001;
+      spaceship.coordinates->x += 0.01;
   } else {
-    spaceship.coordinates->x -= 0.001;
+    spaceship.coordinates->x -= 0.01;
   }
 
   if(spaceship.coordinates->x > 3.5) {
@@ -178,9 +198,11 @@ void propelSpaceshipBullets(Spaceship &spaceship) {
 }
 
 void shootBlankOrLiveBullet(Spaceship &spaceship) {
-  if(spaceship.firingDelay++ == 200) {
-    spaceship.bullets.push_back(Bullet(true, spaceship.coordinates->x, spaceship.coordinates->y, spaceship.coordinates->z));
-    spaceship.firingDelay = 0;
+  if(!spaceship.isHit) {
+    if(spaceship.firingDelay++ == 200) {
+      spaceship.bullets.push_back(Bullet(true, spaceship.coordinates->x, spaceship.coordinates->y, spaceship.coordinates->z));
+      spaceship.firingDelay = 0;
+    }
   }
 }
 

@@ -5,7 +5,8 @@ public:
   Rotation* rotation;
   std::vector<Bullet> bullets;
   int firingDelay;
-    Spaceship(bool isHostile, float tx, float ty, float tz, float angle, float rx, float ry, float rz);
+  bool isHit;
+  Spaceship(bool isHostile, float tx, float ty, float tz, float angle, float rx, float ry, float rz);
 };
 
 Spaceship::Spaceship(bool isHostile, float tx, float ty, float tz, float angle, float rx, float ry, float rz) {
