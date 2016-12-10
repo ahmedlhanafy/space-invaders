@@ -79,6 +79,18 @@ void display() {
 
   drawSpaceshipBullets(player);
   drawSpaceshipBullets(opponent);
+  
+  // POTENTIAL SCORE REPRESENTATION
+
+  //glDisable(GL_DEPTH_TEST);
+  //glPushMatrix();
+  //glScaled(0.009, 0.009, 0.009);
+  //glRotated(90, -1, 0, 0);
+  //glRotated(90, 0, -1, 0);
+  //glTranslated(30,5,0);
+  //model_spaceship_opponent.Draw();
+  //glPopMatrix();
+  //glEnable(GL_DEPTH_TEST);
 
   glFlush();
 }
@@ -96,6 +108,7 @@ void animation() {
 
 	 if(detectSpaceshipHit(opponent, player)){
 		score++;
+		opponent.coordinates = new Coordinates(-100, -100, -100);
 		printf("%d\n", score);
 	 }
 	}
@@ -116,7 +129,6 @@ bool detectSpaceshipHit(Spaceship &spaceship1, Spaceship &spaceship2) {
 		&& spaceship1Coordinates->x - 0.25 < player2BulletCoordinates->x
 		&& spaceship1Coordinates->x + 0.25 > player2BulletCoordinates->x) {
 			spaceship1.isHit = true;
-			spaceship1.coordinates = new Coordinates(-100, -100, -100);
 			return true;
 		}
 	}
@@ -313,7 +325,7 @@ void setupLights(float playerx, float playery, float playerz) {
 	glMaterialfv(GL_FRONT, GL_SPECULAR, mat_specular);
 	glMaterialfv(GL_FRONT, GL_SHININESS, mat_shininess);
 
-	GLfloat l0Diffuse[] = { 1.0, 1.0f, 1.0f, 1.0f };
+	GLfloat l0Diffuse[] = { 1.0, 1.0, 1.0, 1.0f };
 	GLfloat l0Position[] = { playerx - 1, playery , playerz, 1 };
 	GLfloat l0Direction[] = { 0.0, 0.0, -1.0 };
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, l0Diffuse);
