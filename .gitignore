@@ -3,3 +3,4 @@ space-invaders.suo
 *.opensdf
 Debug/*
 space-invaders/Debug/*
+ipch/
