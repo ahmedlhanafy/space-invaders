@@ -28,6 +28,7 @@ void display();
 void animation();
 void generateNewWaveOfOpponents();
 void drawScoreAndLevel(int score, int level);
+void drawGameOver();
 void setupCamera();
 void setupLights(float playerx, float playery, float playerz);
 void mouseHandler(int x, int y);
@@ -53,7 +54,7 @@ const int WINDOW_POSITION_X = 150;
 const int WINDOW_POSITION_Y = 150;
 
 int opponentsCount = 5;
-int opponentsBulletFiringDelay = 5;
+int opponentsBulletFiringDelay = 1;
 double opponentsSpeed = 0.001;
 
 // VARIABLE CONFIGURATIONS
@@ -104,7 +105,7 @@ void display() {
     because it converts the drawing to be 2D 
   */
   drawScoreAndLevel(score, level);
-
+  if(gameOver) drawGameOver();
   glFlush();
 }
 
@@ -148,12 +149,36 @@ void generateNewWaveOfOpponents(){
   }
   if(allKilled){
     opponentsCount += 4;
-    opponentsBulletFiringDelay += 2;
+    opponentsBulletFiringDelay += 1;
     opponentsSpeed += 0.003;
     opponents = initializeOpponents(opponentsCount, level);
     level++;
   }
 }
+
+void drawGameOver(){
+  glDisable(GL_TEXTURE_2D); 
+  glMatrixMode(GL_PROJECTION);
+  glPushMatrix();
+  glLoadIdentity();
+  gluOrtho2D(0.0, WINDOW_WIDTH, 0.0, WINDOW_HEIGHT);
+  glMatrixMode(GL_MODELVIEW);
+  glPushMatrix();
+  glLoadIdentity();
+  glRasterPos2i(WINDOW_WIDTH/2 - 40, WINDOW_HEIGHT/ 2);  
+  string s = "Game Over";
+  void * font = GLUT_BITMAP_9_BY_15;
+  glScaled(200,200,200);  
+  for (string::iterator i = s.begin(); i != s.end(); ++i){
+    char c = *i;
+    glutBitmapCharacter(font, c);
+  }
+  glMatrixMode(GL_MODELVIEW); 
+  glPopMatrix();
+  glPopMatrix();
+  glEnable(GL_TEXTURE_2D);
+}
+
 
 void drawScoreAndLevel(int score, int level){
   glDisable(GL_TEXTURE_2D); 
@@ -168,6 +193,7 @@ void drawScoreAndLevel(int score, int level){
   std::ostringstream o;
   o << "Score: " << score << " | Level: " << level;
   string s = o.str();
+  glScaled(200,200,200);
   void * font = GLUT_BITMAP_9_BY_15;
   for (string::iterator i = s.begin(); i != s.end(); ++i){
     char c = *i;
