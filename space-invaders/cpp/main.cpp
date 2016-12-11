@@ -168,11 +168,8 @@ void keyboardHandler(unsigned char k, int x, int y) {
       observerCoordinates.x--;
   if(k == 'd')
       observerCoordinates.x++;
-  if(k == ' ') {
+  if(k == ' ' && !gameOver) {
     player.bullets.push_back(Bullet(true, player.coordinates->x, player.coordinates->y, player.coordinates->z));
-  }
-  if(k == 'n') {
-    player.isHit = false;
   }
 
   glutPostRedisplay();
