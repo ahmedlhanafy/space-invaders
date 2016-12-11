@@ -12,7 +12,9 @@
 #include "Bullet.h"
 #include "Spaceship.h"
 #include "Token.h"
-
+#include <iostream>
+#include <string>
+#include <sstream>
 
 using namespace std;
 
@@ -25,6 +27,7 @@ using namespace std;
 void display();
 void animation();
 void generateNewWaveOfOpponents();
+void drawScore(int score);
 void setupCamera();
 void setupLights(float playerx, float playery, float playerz);
 void mouseHandler(int x, int y);
@@ -43,8 +46,8 @@ void drawSkybox();
 vector<Spaceship> initializeOpponents(int opponentsCount, int levelOfGame);
 // FIXED CONFIGURATIONS
 
-const int WINDOW_WIDTH = 700;
-const int WINDOW_HEIGHT = 700;
+int WINDOW_WIDTH = 1080;
+int WINDOW_HEIGHT = 720;
 
 const int WINDOW_POSITION_X = 150;
 const int WINDOW_POSITION_Y = 150;
@@ -96,17 +99,11 @@ void display() {
     drawSpaceshipBullets(opponents[i]);
   }
 
-  // POTENTIAL SCORE REPRESENTATION
 
-  //glDisable(GL_DEPTH_TEST);
-  //glPushMatrix();
-  //glScaled(0.009, 0.009, 0.009);
-  //glRotated(90, -1, 0, 0);
-  //glRotated(90, 0, -1, 0);
-  //glTranslated(30,5,0);
-  //model_spaceship_opponent.Draw();
-  //glPopMatrix();
-  //glEnable(GL_DEPTH_TEST);
+  /* This has to be the last method to be called in display method
+    because it converts the drawing to be 2D 
+  */
+  drawScore(score);
 
   glFlush();
 }
@@ -156,6 +153,30 @@ void generateNewWaveOfOpponents(){
     opponents = initializeOpponents(opponentsCount, level);
     level++;
   }
+}
+
+void drawScore(int score){
+  glDisable(GL_TEXTURE_2D); 
+  glMatrixMode(GL_PROJECTION);
+  glPushMatrix();
+  glLoadIdentity();
+  gluOrtho2D(0.0, WINDOW_WIDTH, 0.0, WINDOW_HEIGHT);
+  glMatrixMode(GL_MODELVIEW);
+  glPushMatrix();
+  glLoadIdentity();
+  glRasterPos2i(10, 10);  
+  std::ostringstream o;
+  o << "Score: " << score;
+  string s = o.str();
+  void * font = GLUT_BITMAP_9_BY_15;
+  for (string::iterator i = s.begin(); i != s.end(); ++i){
+    char c = *i;
+    glutBitmapCharacter(font, c);
+  }
+  glMatrixMode(GL_MODELVIEW); 
+  glPopMatrix();
+  glPopMatrix();
+  glEnable(GL_TEXTURE_2D);
 }
 
 bool detectSpaceshipHit(Spaceship &spaceship1, Spaceship &spaceship2) {
