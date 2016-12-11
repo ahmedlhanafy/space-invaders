@@ -33,6 +33,7 @@ void specialKeyboardUpHandler(int k, int x, int y);
 void drawPlayerSpaceship(Spaceship &spaceship);
 void drawOpponentSpaceship(Spaceship &spaceship);
 void drawBullet(Bullet &bullet);
+void drawToken(Token &token);
 void drawSpaceshipBullets(Spaceship &spaceship);
 void transformOpponent(Spaceship &spaceship,int randomNumber, int opponentsCount);
 void propelSpaceshipBullets(Spaceship &spaceship);
@@ -83,6 +84,7 @@ void display() {
   drawPlayerSpaceship(player);
   drawSpaceshipBullets(player);
   drawSkybox();
+  drawToken(token);
 
   for (unsigned int i = 0; i < opponents.size(); i++) {
     drawOpponentSpaceship(opponents[i]);
@@ -271,7 +273,7 @@ void drawSpaceshipBullets(Spaceship &spaceship) {
 void drawToken(Token &token){
   glPushMatrix();
   glTranslated(token.coordinates->x, token.coordinates->y, token.coordinates->z);
-  glScaled(0.0009, 0.0009, 0.0009);
+  glScaled(0.0002, 0.0001, 0.0004);
   model_token.Draw();
   glPopMatrix();
 }
