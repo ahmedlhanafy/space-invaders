@@ -97,26 +97,26 @@ void display() {
 }
 
 void animation() {
+  if(!gameOver){
+    for (unsigned int i = 0; i < opponents.size(); i++) {
+      transformOpponent(opponents[i], i);
+      shootBlankOrLiveBullet(opponents[i]);
 
-	if(!gameOver){
+      if(detectSpaceshipHit(player, opponents[i])) {
+        gameOver = true;
+      }
 
-  transformOpponent(opponent);
-  shootBlankOrLiveBullet(opponent);
-
-  if(detectSpaceshipHit(player, opponent)) {
-    gameOver = true;
+      if(detectSpaceshipHit(opponents[i], player)){
+        score++;
+        opponents[i].coordinates = new Coordinates(-100, -100, -100);
+        printf("%d\n", score);
+      }
+    }
   }
-
-  if(detectSpaceshipHit(opponent, player)){
-  score++;
-  opponent.coordinates = new Coordinates(-100, -100, -100);
-  printf("%d\n", score);
-  }
-  }
-
   propelSpaceshipBullets(player);
-  propelSpaceshipBullets(opponent);
-
+  for (unsigned int i = 0; i < opponents.size(); i++) {
+    propelSpaceshipBullets(opponents[i]);
+  }
   glutPostRedisplay();
 }
 
