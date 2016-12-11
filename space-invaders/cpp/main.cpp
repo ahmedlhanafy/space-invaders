@@ -66,7 +66,7 @@ Model_3DS model_token;
 bool gameOver = false;
 
 Coordinates observedCoordinates(0, 0, 0);
-Coordinates observerCoordinates(0, 3, 5);
+Coordinates observerCoordinates(34, 3, 14);
 Coordinates mouseCoordinates(0, 0, 0);
 
 Spaceship player(false, 0, 0, 2.5, 0, 0, 0, 0);
@@ -85,54 +85,71 @@ const int CAMERA_MODE_ONE = 0;
 const int CAMERA_MODE_TWO = 1;
 const int CAMERA_MODE_THREE = 2;
 
+bool entranceAnimation = true;
+
 // DISPLAY & ANIMATION
 
 void display() {
   setupLights(player.coordinates->x, player.coordinates->y, player.coordinates->z);
   setupCamera();
+  drawSkybox();
 
   drawPlayerSpaceship(player);
   drawSpaceshipBullets(player);
-  drawSkybox();
 
   for (unsigned int i = 0; i < opponents.size(); i++) {
     drawOpponentSpaceship(opponents[i]);
     drawSpaceshipBullets(opponents[i]);
   }
-
-
+  
   /* This has to be the last method to be called in display method
     because it converts the drawing to be 2D 
   */
   drawScoreAndLevel(score, level);
   if(gameOver) drawGameOver();
+
   glFlush();
 }
 
 void animation() {
-  if(!gameOver){
-    for (unsigned int i = 0; i < opponents.size(); i++) {
-      transformOpponent(opponents[i], i, opponentsCount);
-      shootBlankOrLiveBullet(opponents[i], i);
+  if(entranceAnimation){
+    double xLowerLimit = 0;
+    double yLowerLimit = 3;
+    double zLowerLimit = 5;
+    
+    observerCoordinates.x -= observerCoordinates.x <= xLowerLimit? 0 : 0.022; 
+    observerCoordinates.y -= observerCoordinates.y <= yLowerLimit? 0 : 0.022; 
+    observerCoordinates.z -= observerCoordinates.z <= zLowerLimit? 0 : 0.006; 
+    
+    if(observerCoordinates.x <= xLowerLimit && observerCoordinates.y <= yLowerLimit && observerCoordinates.z <= zLowerLimit){
+      entranceAnimation = false;
+    }
 
-      if(detectSpaceshipHit(player, opponents[i])) {
-        gameOver = true;
-	  }
+  }else{
+    if(!gameOver){
+      for (unsigned int i = 0; i < opponents.size(); i++) {
+        transformOpponent(opponents[i], i, opponentsCount);
+        shootBlankOrLiveBullet(opponents[i], i);
 
-      if(detectSpaceshipHit(opponents[i], player)){
-        score++;
-		    PlaySound("audio/Impact.wav", NULL, SND_ASYNC | SND_FILENAME);
-        opponents[i].coordinates = new Coordinates(-100, -100, -100);
-        printf("%d\n", score);
+        if(detectSpaceshipHit(player, opponents[i])) {
+          gameOver = true;
+      }
+
+        if(detectSpaceshipHit(opponents[i], player)){
+          score++;
+          PlaySound("audio/Impact.wav", NULL, SND_ASYNC | SND_FILENAME);
+          opponents[i].coordinates = new Coordinates(-100, -100, -100);
+          printf("%d\n", score);
+        }
       }
     }
-  }
-  propelSpaceshipBullets(player);
-  for (unsigned int i = 0; i < opponents.size(); i++) {
-    propelSpaceshipBullets(opponents[i]);
-  }
+    propelSpaceshipBullets(player);
+    for (unsigned int i = 0; i < opponents.size(); i++) {
+      propelSpaceshipBullets(opponents[i]);
+    }
 
-  generateNewWaveOfOpponents();
+    generateNewWaveOfOpponents();
+  }
 
   glutPostRedisplay();
 }
