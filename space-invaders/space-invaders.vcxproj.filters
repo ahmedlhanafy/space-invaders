@@ -29,6 +29,15 @@
     <None Include="img\stars.bmp">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="audio\atomicBomb.wav">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="audio\Impact.wav">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="audio\playerShoots.wav">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="cpp\Bullet.h">
@@ -50,6 +59,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="cpp\TextureBuilder.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cpp\Token.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

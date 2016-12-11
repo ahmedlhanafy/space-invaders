@@ -2,6 +2,7 @@
 #include "TextureBuilder.h"
 #include "Model_3DS.h"
 #include "GLTexture.h"
+#include <windows.h>
 #include <stdio.h>
 #include <time.h>
 #include <vector>
@@ -10,6 +11,8 @@
 #include "Rotation.h"
 #include "Bullet.h"
 #include "Spaceship.h"
+#include "Token.h"
+
 
 using namespace std;
 
@@ -31,13 +34,13 @@ void drawPlayerSpaceship(Spaceship &spaceship);
 void drawOpponentSpaceship(Spaceship &spaceship);
 void drawBullet(Bullet &bullet);
 void drawSpaceshipBullets(Spaceship &spaceship);
+void drawToken(Token &token);
 void transformOpponent(Spaceship &spaceship,int randomNumber);
 void propelSpaceshipBullets(Spaceship &spaceship);
 void shootBlankOrLiveBullet(Spaceship &spaceship);
 bool detectSpaceshipHit(Spaceship &player, Spaceship &opponent);
 void drawSkybox();
 vector<Spaceship> initializeOpponents(int opponentsCount);
-
 // FIXED CONFIGURATIONS
 
 int WINDOW_WIDTH = 700;
@@ -53,6 +56,7 @@ GLTexture tex;
 Model_3DS model_spaceship_player;
 Model_3DS model_spaceship_opponent;
 Model_3DS model_bullet;
+Model_3DS model_token;
 bool gameOver = false;
 
 Coordinates observedCoordinates(0, 0, 0);
@@ -61,6 +65,7 @@ Coordinates mouseCoordinates(0, 0, 0);
 
 Spaceship player(false, 0, 0, 2.5, 0, 0, 0, 0);
 vector<Spaceship> opponents;
+Token token(1, 0,0,0);
 
 Coordinates spotlights(0, 0, 0);
 
@@ -75,7 +80,7 @@ void display() {
   drawPlayerSpaceship(player);
   drawSpaceshipBullets(player);
   drawSkybox();
-
+  
   for (unsigned int i = 0; i < opponents.size(); i++) {
     drawOpponentSpaceship(opponents[i]);
     drawSpaceshipBullets(opponents[i]);
@@ -108,6 +113,7 @@ void animation() {
 
       if(detectSpaceshipHit(opponents[i], player)){
         score++;
+		PlaySound("audio/Impact.wav", NULL, SND_ASYNC | SND_FILENAME);
         opponents[i].coordinates = new Coordinates(-100, -100, -100);
         printf("%d\n", score);
       }
@@ -129,6 +135,7 @@ bool detectSpaceshipHit(Spaceship &spaceship1, Spaceship &spaceship2) {
 		if((int)player2BulletCoordinates->z == (int)spaceship1Coordinates->z
 		&& spaceship1Coordinates->x - 0.25 < player2BulletCoordinates->x
 		&& spaceship1Coordinates->x + 0.25 > player2BulletCoordinates->x) {
+			spaceship2.bullets[i].coordinates = new Coordinates(500, 500, 500);
 			spaceship1.isHit = true;
 			return true;
 		}
@@ -141,6 +148,7 @@ void LoadAssets() {
 	model_spaceship_player.Load("models/player3d/fighter.3DS");
 	model_spaceship_opponent.Load("models/opponent3d/fighter.3DS");
 	model_bullet.Load("models/bullet3d/Bullet.3DS");
+	model_token.Load("models/token3d/token.3DS");
 	tex.Load("img/stars.bmp"); // Loads a bitmap
 }
 
@@ -168,11 +176,9 @@ void keyboardHandler(unsigned char k, int x, int y) {
       observerCoordinates.x--;
   if(k == 'd')
       observerCoordinates.x++;
-  if(k == ' ') {
+  if(k == ' ' && !gameOver) {
     player.bullets.push_back(Bullet(true, player.coordinates->x, player.coordinates->y, player.coordinates->z));
-  }
-  if(k == 'n') {
-    player.isHit = false;
+	PlaySound("audio/playerShoots.wav", NULL, SND_ASYNC | SND_FILENAME);
   }
 
   glutPostRedisplay();
@@ -238,6 +244,14 @@ void drawSpaceshipBullets(Spaceship &spaceship) {
   for (unsigned int i = 0; i < spaceship.bullets.size(); i++) {
     drawBullet(spaceship.bullets[i]);
   }
+}
+
+void drawToken(Token &token){
+  glPushMatrix();
+  glTranslated(token.coordinates->x, token.coordinates->y, token.coordinates->z);
+  glScaled(0.0009, 0.0009, 0.0009);
+  model_token.Draw();
+  glPopMatrix();
 }
 
 void drawSkybox() {
