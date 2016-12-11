@@ -31,9 +31,9 @@ void drawPlayerSpaceship(Spaceship &spaceship);
 void drawOpponentSpaceship(Spaceship &spaceship);
 void drawBullet(Bullet &bullet);
 void drawSpaceshipBullets(Spaceship &spaceship);
-void transformOpponent(Spaceship &spaceship,int randomNumber);
+void transformOpponent(Spaceship &spaceship,int randomNumber, int opponentsCount);
 void propelSpaceshipBullets(Spaceship &spaceship);
-void shootBlankOrLiveBullet(Spaceship &spaceship);
+void shootBlankOrLiveBullet(Spaceship &spaceship, int index);
 bool detectSpaceshipHit(Spaceship &player, Spaceship &opponent);
 void drawSkybox();
 vector<Spaceship> initializeOpponents(int opponentsCount);
@@ -46,7 +46,7 @@ int WINDOW_HEIGHT = 700;
 int WINDOW_POSITION_X = 150;
 int WINDOW_POSITION_Y = 150;
 
-int OPPONENTS_COUNT = 16;
+int OPPONENTS_COUNT = 10;
 
 // VARIABLE CONFIGURATIONS
 GLTexture tex;
@@ -99,12 +99,12 @@ void display() {
 void animation() {
   if(!gameOver){
     for (unsigned int i = 0; i < opponents.size(); i++) {
-      // transformOpponent(opponents[i], i);
-      shootBlankOrLiveBullet(opponents[i]);
+      transformOpponent(opponents[i], i, OPPONENTS_COUNT);
+      shootBlankOrLiveBullet(opponents[i], i);
 
       if(detectSpaceshipHit(player, opponents[i])) {
         gameOver = true;
-      }
+	  }
 
       if(detectSpaceshipHit(opponents[i], player)){
         score++;
@@ -181,12 +181,12 @@ void keyboardHandler(unsigned char k, int x, int y) {
 void specialKeyboardHandler(int k, int x, int y) {
 	if(!gameOver) {
 	  if(k == GLUT_KEY_RIGHT) {
-		player.coordinates->x += 0.1;
+		player.coordinates->x += 0.15;
 		if(player.rotation->angle <= 45)
 		  player.rotation->angle += 15;
 	  }
 	  if(k == GLUT_KEY_LEFT) {
-		player.coordinates->x -= 0.1;
+		player.coordinates->x -= 0.15;
 		if(player.rotation->angle >= -45)
 		  player.rotation->angle -= 15;
 	  }
@@ -257,15 +257,9 @@ void drawSkybox() {
 }
 // TRANSFORMATIONS
 
-void transformOpponent(Spaceship &spaceship, int randomNumber) {
+void transformOpponent(Spaceship &spaceship, int randomNumber, int opponentsCount) {
   srand(time(0));
-
-  if(rand() % (OPPONENTS_COUNT-0 + 1) + 0 == randomNumber) {
-      spaceship.coordinates->x += 0.02;
-  } else {
-    spaceship.coordinates->x -= 0.02;
-  }
-
+  spaceship.coordinates->x += rand() % (opponentsCount + 1) == randomNumber?  0.001: -0.001;
   if(spaceship.coordinates->x > 3.5) {
     spaceship.coordinates->x -= 7;
   }
@@ -290,9 +284,12 @@ void propelSpaceshipBullets(Spaceship &spaceship) {
   }
 }
 
-void shootBlankOrLiveBullet(Spaceship &spaceship) {
+void shootBlankOrLiveBullet(Spaceship &spaceship, int index) {
+  srand(time(0));
   if(!spaceship.isHit) {
-    if(spaceship.firingDelay++ == 200) {
+    spaceship.firingDelay += index + 1;
+    int delay = 5;
+    if(spaceship.firingDelay % (rand() / delay) == 0) {
       spaceship.bullets.push_back(Bullet(true, spaceship.coordinates->x, spaceship.coordinates->y, spaceship.coordinates->z));
       spaceship.firingDelay = 0;
     }
@@ -379,7 +376,7 @@ vector<Spaceship> initializeOpponents(int opponentsCount){
 int main(int argc, char** argv) {
   // Opponents Initilization 
   opponents = initializeOpponents(OPPONENTS_COUNT);
-  
+
   glutInit(&argc, argv);
   glutInitWindowSize(WINDOW_WIDTH, WINDOW_HEIGHT);
   glutInitWindowPosition(WINDOW_POSITION_X, WINDOW_POSITION_Y);
