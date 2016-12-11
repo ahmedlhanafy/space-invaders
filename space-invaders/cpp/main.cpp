@@ -24,6 +24,7 @@ using namespace std;
 
 void display();
 void animation();
+void generateNewWaveOfOpponents();
 void setupCamera();
 void setupLights(float playerx, float playery, float playerz);
 void mouseHandler(int x, int y);
@@ -39,16 +40,18 @@ void propelSpaceshipBullets(Spaceship &spaceship);
 void shootBlankOrLiveBullet(Spaceship &spaceship, int index);
 bool detectSpaceshipHit(Spaceship &player, Spaceship &opponent);
 void drawSkybox();
-vector<Spaceship> initializeOpponents(int opponentsCount);
+vector<Spaceship> initializeOpponents(int opponentsCount, int levelOfGame);
 // FIXED CONFIGURATIONS
 
-int WINDOW_WIDTH = 700;
-int WINDOW_HEIGHT = 700;
+const int WINDOW_WIDTH = 700;
+const int WINDOW_HEIGHT = 700;
 
-int WINDOW_POSITION_X = 150;
-int WINDOW_POSITION_Y = 150;
+const int WINDOW_POSITION_X = 150;
+const int WINDOW_POSITION_Y = 150;
 
-int OPPONENTS_COUNT = 10;
+int opponentsCount = 5;
+int opponentsBulletFiringDelay = 5;
+double opponentsSpeed = 0.001;
 
 // VARIABLE CONFIGURATIONS
 GLTexture tex;
@@ -70,10 +73,14 @@ Coordinates spotlights(0, 0, 0);
 
 int score = 0;
 
+// This determines the number of opponents and the speed they shoot with
+int level = 0;
+
 int cameraMode = 0;
 const int CAMERA_MODE_ONE = 0;
 const int CAMERA_MODE_TWO = 1;
 const int CAMERA_MODE_THREE = 2;
+
 // DISPLAY & ANIMATION
 
 void display() {
@@ -107,7 +114,7 @@ void display() {
 void animation() {
   if(!gameOver){
     for (unsigned int i = 0; i < opponents.size(); i++) {
-      transformOpponent(opponents[i], i, OPPONENTS_COUNT);
+      transformOpponent(opponents[i], i, opponentsCount);
       shootBlankOrLiveBullet(opponents[i], i);
 
       if(detectSpaceshipHit(player, opponents[i])) {
@@ -116,7 +123,7 @@ void animation() {
 
       if(detectSpaceshipHit(opponents[i], player)){
         score++;
-		PlaySound("audio/Impact.wav", NULL, SND_ASYNC | SND_FILENAME);
+		    PlaySound("audio/Impact.wav", NULL, SND_ASYNC | SND_FILENAME);
         opponents[i].coordinates = new Coordinates(-100, -100, -100);
         printf("%d\n", score);
       }
@@ -126,7 +133,29 @@ void animation() {
   for (unsigned int i = 0; i < opponents.size(); i++) {
     propelSpaceshipBullets(opponents[i]);
   }
+
+  generateNewWaveOfOpponents();
+
   glutPostRedisplay();
+}
+
+void generateNewWaveOfOpponents(){
+  bool allKilled = false;
+  // Check if all opponents are killed
+  for (unsigned int i = 0; i < opponents.size(); i++) {
+    if(!opponents[i].isHit){
+      allKilled = false;
+      break;
+    }
+    allKilled = true;
+  }
+  if(allKilled){
+    opponentsCount += 4;
+    opponentsBulletFiringDelay += 2;
+    opponentsSpeed += 0.003;
+    opponents = initializeOpponents(opponentsCount, level);
+    level++;
+  }
 }
 
 bool detectSpaceshipHit(Spaceship &spaceship1, Spaceship &spaceship2) {
@@ -295,7 +324,7 @@ void drawSkybox() {
 
 void transformOpponent(Spaceship &spaceship, int randomNumber, int opponentsCount) {
   srand(time(0));
-  spaceship.coordinates->x += rand() % (opponentsCount + 1) == randomNumber?  0.001: -0.001;
+  spaceship.coordinates->x += rand() % (opponentsCount + 1) == randomNumber?  opponentsSpeed: -1 * opponentsSpeed;
   if(spaceship.coordinates->x > 3.5) {
     spaceship.coordinates->x -= 7;
   }
@@ -324,8 +353,7 @@ void shootBlankOrLiveBullet(Spaceship &spaceship, int index) {
   srand(time(0));
   if(!spaceship.isHit) {
     spaceship.firingDelay += index + 1;
-    int delay = 5;
-    if(spaceship.firingDelay % (rand() / delay) == 0) {
+    if(spaceship.firingDelay % (rand() / opponentsBulletFiringDelay) == 0) {
       spaceship.bullets.push_back(Bullet(true, spaceship.coordinates->x, spaceship.coordinates->y, spaceship.coordinates->z));
       spaceship.firingDelay = 0;
     }
@@ -394,14 +422,20 @@ void setupLights(float playerx, float playery, float playerz) {
 	glLightfv(GL_LIGHT3, GL_SPOT_DIRECTION, light_direction_1);
 }
 
-vector<Spaceship> initializeOpponents(int opponentsCount){
+vector<Spaceship> initializeOpponents(int opponentsCount, int levelOfGame){
   vector<Spaceship> opponents;
   for (unsigned int i = 0; i < opponentsCount; i++) {
-    double interpolationUpperLimit   = opponentsCount/2;
+    double interpolationUpperLimit = opponentsCount/2;
     double xCoordinate  = i < interpolationUpperLimit ? (i * 4) / interpolationUpperLimit :
       ((i - interpolationUpperLimit) * -4) / interpolationUpperLimit;
-    double zCoordinate  = i % 2 == 0? -3: -1;
-
+    double zCoordinate = -3;
+    if(levelOfGame < 1){
+      zCoordinate = -3;
+    }else if(levelOfGame <= 2){
+      zCoordinate  = i % 2 == 0? -3: -1;
+    }else {
+      zCoordinate  = i % 2 == 0? -3: i % 3 == 0? -1: -4.5;      
+    }
     opponents.push_back(Spaceship(true, xCoordinate, 0, zCoordinate, 0, 0, 0, 0));
   }
   return opponents;
@@ -411,7 +445,7 @@ vector<Spaceship> initializeOpponents(int opponentsCount){
 
 int main(int argc, char** argv) {
   // Opponents Initilization
-  opponents = initializeOpponents(OPPONENTS_COUNT);
+  opponents = initializeOpponents(opponentsCount, level);
 
   glutInit(&argc, argv);
   glutInitWindowSize(WINDOW_WIDTH, WINDOW_HEIGHT);
