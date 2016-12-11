@@ -37,7 +37,6 @@ void shootBlankOrLiveBullet(Spaceship &spaceship);
 bool detectSpaceshipHit(Spaceship &player, Spaceship &opponent);
 void drawSkybox();
 vector<Spaceship> initializeOpponents(int opponentsCount);
-
 // FIXED CONFIGURATIONS
 
 int WINDOW_WIDTH = 700;
@@ -129,6 +128,7 @@ bool detectSpaceshipHit(Spaceship &spaceship1, Spaceship &spaceship2) {
 		if((int)player2BulletCoordinates->z == (int)spaceship1Coordinates->z
 		&& spaceship1Coordinates->x - 0.25 < player2BulletCoordinates->x
 		&& spaceship1Coordinates->x + 0.25 > player2BulletCoordinates->x) {
+			spaceship2.bullets[i].coordinates = new Coordinates(500, 500, 500);
 			spaceship1.isHit = true;
 			return true;
 		}
