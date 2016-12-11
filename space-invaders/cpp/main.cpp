@@ -1,6 +1,7 @@
 // IMPORTS
 #include "TextureBuilder.h"
 #include "Model_3DS.h"
+#include <windows.h>
 #include "GLTexture.h"
 #include <stdio.h>
 #include <time.h>
@@ -107,6 +108,7 @@ void animation() {
 
       if(detectSpaceshipHit(opponents[i], player)){
         score++;
+		PlaySound("Impact.wav", NULL, SND_ASYNC | SND_FILENAME);
         opponents[i].coordinates = new Coordinates(-100, -100, -100);
         printf("%d\n", score);
       }
@@ -170,6 +172,7 @@ void keyboardHandler(unsigned char k, int x, int y) {
       observerCoordinates.x++;
   if(k == ' ' && !gameOver) {
     player.bullets.push_back(Bullet(true, player.coordinates->x, player.coordinates->y, player.coordinates->z));
+	PlaySound("playerShoots.wav", NULL, SND_ASYNC | SND_FILENAME);
   }
 
   glutPostRedisplay();

@@ -16,7 +16,10 @@
     <ClCompile Include="cpp\Model_3DS.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="atomicBomb.wav" />
     <None Include="img\stars.bmp" />
+    <None Include="Impact.wav" />
+    <None Include="playerShoots.wav" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="cpp\Bullet.h" />

@@ -29,6 +29,15 @@
     <None Include="img\stars.bmp">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="atomicBomb.wav">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="playerShoots.wav">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Impact.wav">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="cpp\Bullet.h">
