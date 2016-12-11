@@ -166,6 +166,10 @@ void tokenCaptured(Spaceship &spaceship, vector<Token> &tokens){
 			&& spaceshipCoordinates->x + 0.25 > tokenCoordinates->x && tokens[i].isAirborne){
 				tokens[i].isAirborne = false;
 				enableToken(tokens[i].type);
+				if (tokens[i].type == 0 ||tokens[i].type == 1)
+					PlaySound("audio/Bell.wav", NULL, SND_ASYNC | SND_FILENAME);
+				else 
+					PlaySound("audio/schade.wav", NULL, SND_ASYNC | SND_FILENAME);
 			}		
 	}
 }
