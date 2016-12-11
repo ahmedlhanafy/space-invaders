@@ -43,6 +43,10 @@ void shootBlankOrLiveBullet(Spaceship &spaceship, int index);
 bool detectSpaceshipHit(Spaceship &player, Spaceship &opponent);
 void drawSkybox();
 vector<Spaceship> initializeOpponents(int opponentsCount);
+void tokenCaptured(Spaceship &spaceship, vector<Token> tokens);
+void enableToken(int type);
+void disableToken(int type);
+
 // FIXED CONFIGURATIONS
 
 int WINDOW_WIDTH = 700;
@@ -125,7 +129,8 @@ void animation() {
         printf("%d\n", score);
       }
     }
-	 transformTokens(tokens);
+	transformTokens(tokens);
+	tokenCaptured(player, tokens);
   }
   propelSpaceshipBullets(player);
   for (unsigned int i = 0; i < opponents.size(); i++) {
@@ -152,7 +157,27 @@ bool detectSpaceshipHit(Spaceship &spaceship1, Spaceship &spaceship2) {
 	return false;
 }
 
+void tokenCaptured(Spaceship &spaceship, vector<Token> tokens){
+	for (unsigned int i = 0; i < tokens.size(); i++) {
+		if (tokens[i].isAirborne){
+			Coordinates* spaceshipCoordinates = spaceship.coordinates;
+			Coordinates* tokenCoordinates = tokens[i].coordinates;
+			if((int)spaceshipCoordinates->z == (int)tokenCoordinates->z
+		&& spaceshipCoordinates->x - 0.25 < tokenCoordinates->x
+		&& spaceshipCoordinates->x + 0.25 > tokenCoordinates->x){
+				tokens[i].isAirborne = false;
+				enableToken(tokens[i].type);
+				return;
+			}
+		}			
+	}
+}
 
+void enableToken(int type){
+	//glutTimerFunc(30000, disableToken, type);
+}
+void disableToken(int type){
+}
 
 void LoadAssets() {
 	model_spaceship_player.Load("models/player3d/fighter.3DS");
@@ -337,7 +362,7 @@ void propelSpaceshipBullets(Spaceship &spaceship) {
 void transformTokens(vector<Token> tokens){
 	for (unsigned int i = 0; i < tokens.size(); i++) {
 		if (tokens[i].isAirborne)
-			tokens[i].coordinates->z += 0.001;			
+			tokens[i].coordinates->z += 0.002;			
   }
 }
 
@@ -457,7 +482,7 @@ int main(int argc, char** argv) {
   glutKeyboardFunc(keyboardHandler);
   glutSpecialFunc(specialKeyboardHandler);
   glutSpecialUpFunc(specialKeyboardUpHandler);
-  glutTimerFunc(10000,generateToken,0);
+  glutTimerFunc(5000,generateToken,0);
   glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
   glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
   glEnable(GL_DEPTH_TEST);
