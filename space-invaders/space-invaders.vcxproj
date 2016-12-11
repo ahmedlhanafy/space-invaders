@@ -16,10 +16,10 @@
     <ClCompile Include="cpp\Model_3DS.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="atomicBomb.wav" />
+    <None Include="audio\atomicBomb.wav" />
+    <None Include="audio\Impact.wav" />
+    <None Include="audio\playerShoots.wav" />
     <None Include="img\stars.bmp" />
-    <None Include="Impact.wav" />
-    <None Include="playerShoots.wav" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="cpp\Bullet.h" />
@@ -29,6 +29,7 @@
     <ClInclude Include="cpp\Rotation.h" />
     <ClInclude Include="cpp\Spaceship.h" />
     <ClInclude Include="cpp\TextureBuilder.h" />
+    <ClInclude Include="cpp\Token.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{28E10042-DE6B-4AF8-B7FD-7AD9886D6FF9}</ProjectGuid>
