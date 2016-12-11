@@ -34,16 +34,16 @@ void drawPlayerSpaceship(Spaceship &spaceship);
 void drawOpponentSpaceship(Spaceship &spaceship);
 void drawBullet(Bullet &bullet);
 void drawToken(Token &token);
-void drawAirborneTokens();
+void drawAirborneTokens(vector<Token> &tokens);
 void drawSpaceshipBullets(Spaceship &spaceship);
 void transformOpponent(Spaceship &spaceship,int randomNumber, int opponentsCount);
 void propelSpaceshipBullets(Spaceship &spaceship);
-void transformTokens();
+void transformTokens(vector<Token> &tokens);
 void shootBlankOrLiveBullet(Spaceship &spaceship, int index);
 bool detectSpaceshipHit(Spaceship &player, Spaceship &opponent);
 void drawSkybox();
 vector<Spaceship> initializeOpponents(int opponentsCount);
-void tokenCaptured(Spaceship &spaceship);
+void tokenCaptured(Spaceship &spaceship, vector<Token> &tokens);
 void enableToken(int type);
 void disableToken(int type);
 
@@ -90,7 +90,7 @@ void display() {
   drawPlayerSpaceship(player);
   drawSpaceshipBullets(player);
   drawSkybox();
-  drawAirborneTokens();
+  drawAirborneTokens(tokens);
 
   for (unsigned int i = 0; i < opponents.size(); i++) {
     drawOpponentSpaceship(opponents[i]);
@@ -129,8 +129,8 @@ void animation() {
         printf("%d\n", score);
       }
     }
-	transformTokens();
-	tokenCaptured(player);
+	transformTokens(tokens);
+	tokenCaptured(player, tokens);
   }
   propelSpaceshipBullets(player);
   for (unsigned int i = 0; i < opponents.size(); i++) {
@@ -157,7 +157,7 @@ bool detectSpaceshipHit(Spaceship &spaceship1, Spaceship &spaceship2) {
 	return false;
 }
 
-void tokenCaptured(Spaceship &spaceship){
+void tokenCaptured(Spaceship &spaceship, vector<Token> &tokens){
 	for (unsigned int i = 0; i < tokens.size(); i++) {
 			Coordinates* spaceshipCoordinates = spaceship.coordinates;
 			Coordinates* tokenCoordinates = tokens[i].coordinates;
@@ -305,7 +305,7 @@ void drawToken(Token &token){
   glPopMatrix();
 }
 
-void drawAirborneTokens(){
+void drawAirborneTokens(vector<Token> &tokens){
 	for (unsigned int i = 0; i < tokens.size(); i++) {
 		if (tokens[i].isAirborne)
 			drawToken(tokens[i]);
@@ -356,7 +356,7 @@ void propelSpaceshipBullets(Spaceship &spaceship) {
   }
 }
 
-void transformTokens(){
+void transformTokens(vector<Token> &tokens){
 	for (unsigned int i = 0; i < tokens.size(); i++) {
 		if (tokens[i].isAirborne)
 			tokens[i].coordinates->z += 0.002;			
