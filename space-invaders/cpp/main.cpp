@@ -66,6 +66,10 @@ Coordinates spotlights(0, 0, 0);
 
 int score = 0;
 
+int cameraMode = 0;
+const int CAMERA_MODE_ONE = 0;
+const int CAMERA_MODE_TWO = 1;
+const int CAMERA_MODE_THREE = 2;
 // DISPLAY & ANIMATION
 
 void display() {
@@ -168,13 +172,29 @@ void keyboardHandler(unsigned char k, int x, int y) {
       observerCoordinates.x--;
   if(k == 'd')
       observerCoordinates.x++;
-  if(k == ' ') {
+  if(k == ' ') 
     player.bullets.push_back(Bullet(true, player.coordinates->x, player.coordinates->y, player.coordinates->z));
-  }
-  if(k == 'n') {
+  if(k == 'n') 
     player.isHit = false;
-  }
+  if(k == 'c'){
+    cameraMode++;
+    if(cameraMode > CAMERA_MODE_THREE) cameraMode = 0;
 
+    if(cameraMode == CAMERA_MODE_ONE){
+      observerCoordinates.y = 3.0;
+      observerCoordinates.z = 5.0;
+    }
+    else if(cameraMode == CAMERA_MODE_TWO){
+      observerCoordinates.y = 3.0;
+      observerCoordinates.z = 9.0;
+    }
+    else if(cameraMode == CAMERA_MODE_THREE){
+      observerCoordinates.y = 10.0;
+      observerCoordinates.z = 3.0;      
+    } 
+
+  }
+  printf("Y -> %f, Z -> %f", observerCoordinates.y, observerCoordinates.z);
   glutPostRedisplay();
 }
 
