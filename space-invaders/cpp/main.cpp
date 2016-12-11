@@ -27,7 +27,7 @@ using namespace std;
 void display();
 void animation();
 void generateNewWaveOfOpponents();
-void drawScore(int score);
+void drawScoreAndLevel(int score, int level);
 void setupCamera();
 void setupLights(float playerx, float playery, float playerz);
 void mouseHandler(int x, int y);
@@ -103,7 +103,7 @@ void display() {
   /* This has to be the last method to be called in display method
     because it converts the drawing to be 2D 
   */
-  drawScore(score);
+  drawScoreAndLevel(score, level);
 
   glFlush();
 }
@@ -155,7 +155,7 @@ void generateNewWaveOfOpponents(){
   }
 }
 
-void drawScore(int score){
+void drawScoreAndLevel(int score, int level){
   glDisable(GL_TEXTURE_2D); 
   glMatrixMode(GL_PROJECTION);
   glPushMatrix();
@@ -166,7 +166,7 @@ void drawScore(int score){
   glLoadIdentity();
   glRasterPos2i(10, 10);  
   std::ostringstream o;
-  o << "Score: " << score;
+  o << "Score: " << score << " | Level: " << level;
   string s = o.str();
   void * font = GLUT_BITMAP_9_BY_15;
   for (string::iterator i = s.begin(); i != s.end(); ++i){
