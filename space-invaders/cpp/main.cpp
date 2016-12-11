@@ -46,7 +46,7 @@ int WINDOW_HEIGHT = 700;
 int WINDOW_POSITION_X = 150;
 int WINDOW_POSITION_Y = 150;
 
-int OPPONENTS_COUNT = 30;
+int OPPONENTS_COUNT = 16;
 
 // VARIABLE CONFIGURATIONS
 GLTexture tex;
@@ -99,7 +99,7 @@ void display() {
 void animation() {
   if(!gameOver){
     for (unsigned int i = 0; i < opponents.size(); i++) {
-      transformOpponent(opponents[i], i);
+      // transformOpponent(opponents[i], i);
       shootBlankOrLiveBullet(opponents[i]);
 
       if(detectSpaceshipHit(player, opponents[i])) {
@@ -363,16 +363,23 @@ void setupLights(float playerx, float playery, float playerz) {
 
 vector<Spaceship> initializeOpponents(int opponentsCount){
   vector<Spaceship> opponents;
-  for (unsigned int i = 0; i < OPPONENTS_COUNT; i++) {
-    opponents.push_back(Spaceship(true, i / 0.1, 0, i %2 == 0? -3: -1, 0, 0, 0, 0));
-  }
+  for (unsigned int i = 0; i < opponentsCount; i++) {
+    double interpolationUpperLimit   = opponentsCount/2;
+    double xCoordinate  = i < interpolationUpperLimit ? (i * 4) / interpolationUpperLimit : 
+      ((i - interpolationUpperLimit) * -4) / interpolationUpperLimit;
+    double zCoordinate  = i % 2 == 0? -3: -1;
+
+    opponents.push_back(Spaceship(true, xCoordinate, 0, zCoordinate, 0, 0, 0, 0));
+  }  
   return opponents;
 }
 
 // MAIN
 
 int main(int argc, char** argv) {
+  // Opponents Initilization 
   opponents = initializeOpponents(OPPONENTS_COUNT);
+  
   glutInit(&argc, argv);
   glutInitWindowSize(WINDOW_WIDTH, WINDOW_HEIGHT);
   glutInitWindowPosition(WINDOW_POSITION_X, WINDOW_POSITION_Y);
