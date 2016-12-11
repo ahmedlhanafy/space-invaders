@@ -34,9 +34,11 @@ void drawPlayerSpaceship(Spaceship &spaceship);
 void drawOpponentSpaceship(Spaceship &spaceship);
 void drawBullet(Bullet &bullet);
 void drawToken(Token &token);
+void drawAirborneTokens(vector<Token> tokens);
 void drawSpaceshipBullets(Spaceship &spaceship);
 void transformOpponent(Spaceship &spaceship,int randomNumber, int opponentsCount);
 void propelSpaceshipBullets(Spaceship &spaceship);
+void transformTokens(vector<Token> tokens);
 void shootBlankOrLiveBullet(Spaceship &spaceship, int index);
 bool detectSpaceshipHit(Spaceship &player, Spaceship &opponent);
 void drawSkybox();
@@ -65,7 +67,7 @@ Coordinates mouseCoordinates(0, 0, 0);
 
 Spaceship player(false, 0, 0, 2.5, 0, 0, 0, 0);
 vector<Spaceship> opponents;
-Token token(1, 0,0,0);
+vector<Token> tokens;
 
 Coordinates spotlights(0, 0, 0);
 
@@ -84,7 +86,7 @@ void display() {
   drawPlayerSpaceship(player);
   drawSpaceshipBullets(player);
   drawSkybox();
-  drawToken(token);
+  drawAirborneTokens(tokens);
 
   for (unsigned int i = 0; i < opponents.size(); i++) {
     drawOpponentSpaceship(opponents[i]);
@@ -123,6 +125,7 @@ void animation() {
         printf("%d\n", score);
       }
     }
+	 transformTokens(tokens);
   }
   propelSpaceshipBullets(player);
   for (unsigned int i = 0; i < opponents.size(); i++) {
@@ -139,15 +142,17 @@ bool detectSpaceshipHit(Spaceship &spaceship1, Spaceship &spaceship2) {
 		// TODO: Make dimensions dynamic
 		if((int)player2BulletCoordinates->z == (int)spaceship1Coordinates->z
 		&& spaceship1Coordinates->x - 0.25 < player2BulletCoordinates->x
-		&& spaceship1Coordinates->x + 0.25 > player2BulletCoordinates->x) {
-			spaceship2.bullets[i].coordinates = new Coordinates(500, 500, 500);
+		&& spaceship1Coordinates->x + 0.25 > player2BulletCoordinates->x
+		&& spaceship2.bullets[i].isAirborne) {
+			spaceship2.bullets[i].isAirborne = false;
 			spaceship1.isHit = true;
 			return true;
 		}
 	}
-
 	return false;
 }
+
+
 
 void LoadAssets() {
 	model_spaceship_player.Load("models/player3d/fighter.3DS");
@@ -261,12 +266,12 @@ void drawBullet(Bullet &bullet) {
   glRotated(bullet.rotation->angle, bullet.rotation->x, bullet.rotation->y, bullet.rotation->z);
   model_bullet.Draw();
   glPopMatrix();
-
 }
 
 void drawSpaceshipBullets(Spaceship &spaceship) {
   for (unsigned int i = 0; i < spaceship.bullets.size(); i++) {
-    drawBullet(spaceship.bullets[i]);
+	  if (spaceship.bullets[i].isAirborne)	
+		drawBullet(spaceship.bullets[i]);
   }
 }
 
@@ -276,6 +281,13 @@ void drawToken(Token &token){
   glScaled(0.0002, 0.0001, 0.0004);
   model_token.Draw();
   glPopMatrix();
+}
+
+void drawAirborneTokens(vector<Token> tokens){
+	for (unsigned int i = 0; i < tokens.size(); i++) {
+		if (tokens[i].isAirborne)
+			drawToken(tokens[i]);
+  }
 }
 
 void drawSkybox() {
@@ -322,6 +334,13 @@ void propelSpaceshipBullets(Spaceship &spaceship) {
   }
 }
 
+void transformTokens(vector<Token> tokens){
+	for (unsigned int i = 0; i < tokens.size(); i++) {
+		if (tokens[i].isAirborne)
+			tokens[i].coordinates->z += 0.001;			
+  }
+}
+
 void shootBlankOrLiveBullet(Spaceship &spaceship, int index) {
   srand(time(0));
   if(!spaceship.isHit) {
@@ -333,6 +352,7 @@ void shootBlankOrLiveBullet(Spaceship &spaceship, int index) {
     }
   }
 }
+
 
 // CAMERA & LIGHTS
 
@@ -409,6 +429,18 @@ vector<Spaceship> initializeOpponents(int opponentsCount){
   return opponents;
 }
 
+
+void generateToken(int val) {
+	if (!gameOver){
+		int tokenType = rand() % 4;
+		float xCoordinate = rand() % 7;
+		Token token(true, tokenType, xCoordinate,0,-7);
+		tokens.push_back(token);
+		drawToken(token);
+		glutPostRedisplay();						
+		glutTimerFunc(10000,generateToken,0);	
+	}
+}
 // MAIN
 
 int main(int argc, char** argv) {
@@ -425,6 +457,7 @@ int main(int argc, char** argv) {
   glutKeyboardFunc(keyboardHandler);
   glutSpecialFunc(specialKeyboardHandler);
   glutSpecialUpFunc(specialKeyboardUpHandler);
+  glutTimerFunc(10000,generateToken,0);
   glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
   glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
   glEnable(GL_DEPTH_TEST);
