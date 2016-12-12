@@ -81,7 +81,7 @@ int cameraMode = 0;
 const int CAMERA_MODE_ONE = 0;
 const int CAMERA_MODE_TWO = 1;
 const int CAMERA_MODE_THREE = 2;
-bool threeBulletsMode = true;
+bool threeBulletsMode = false;
 // DISPLAY & ANIMATION
 
 void display() {
@@ -167,8 +167,12 @@ void tokenCaptured(Spaceship &spaceship, vector<Token> &tokens){
 			&& spaceshipCoordinates->x + 0.25 > tokenCoordinates->x && tokens[i].isAirborne){
 				tokens[i].isAirborne = false;
 				enableToken(tokens[i].type);
-				if (tokens[i].type == 0 ||tokens[i].type == 1)
+				if (tokens[i].type == 0 ||tokens[i].type == 1) {
 					PlaySound("audio/Bell.wav", NULL, SND_ASYNC | SND_FILENAME);
+					enableToken(tokens[i].type);
+					glutTimerFunc(5000, disableToken, tokens[i].type);
+					break;
+				}
 				else 
 					PlaySound("audio/schade.wav", NULL, SND_ASYNC | SND_FILENAME);
 			}		
@@ -176,9 +180,16 @@ void tokenCaptured(Spaceship &spaceship, vector<Token> &tokens){
 }
 
 void enableToken(int type){
-	//glutTimerFunc(30000, disableToken, type);
+	switch(type) {
+		case 0: threeBulletsMode = true; break;
+		default: break;
+	}
 }
 void disableToken(int type){
+	switch(type) {
+		case 0: threeBulletsMode = false; break;
+		default: break;
+	}
 }
 
 void LoadAssets() {
