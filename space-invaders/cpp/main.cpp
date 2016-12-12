@@ -29,6 +29,7 @@ using namespace std;
 void display();
 void animation();
 void generateNewWaveOfOpponents();
+void activateNuke();
 void drawScoreAndLevel(int score, int level);
 void drawGameOver();
 void setupCamera();
@@ -54,8 +55,8 @@ vector<Spaceship> initializeOpponents(int opponentsCount, int levelOfGame);
 void tokenCaptured(Spaceship &spaceship, vector<Token> &tokens);
 void enableToken(int type);
 void disableToken(int type);
-void drawNuke();
-bool propelNuke();
+void drawNuke(Bullet &bullet);
+bool propelNuke(Bullet &bullet);
 // FIXED CONFIGURATIONS
 
 int WINDOW_WIDTH = 1080;
@@ -119,12 +120,14 @@ void display() {
     drawOpponentSpaceship(opponents[i]);
     drawSpaceshipBullets(opponents[i]);
   }
-  if(nuke.isAirborne && nukeMode)
-	  drawNuke();
 
-  /* This has to be the last method to be called in display method
-  because it converts the drawing to be 2D
-*/
+  if(nuke.isAirborne && nukeMode)
+	  drawNuke(nuke);
+
+
+  /*  This has to be the last method to be called in display method
+      because it converts the drawing to be 2D
+  */
   drawScoreAndLevel(score, level);
   if (gameOver)
     drawGameOver();
@@ -172,12 +175,8 @@ void animation() {
     }
     propelSpaceshipBullets(player);
 
-	  if(nukeMode && propelNuke()){
-      score += opponents.size();
-      opponents.clear();
-      nukeMode = false;
-      nuke.isAirborne = false;
-      nuke.coordinates = new Coordinates(player.coordinates->x ,player.coordinates->y,player.coordinates->z);
+	  if(nukeMode && propelNuke(nuke)){
+      activateNuke();
     }
 
     for (unsigned int i = 0; i < opponents.size(); i++) {
@@ -186,6 +185,14 @@ void animation() {
     generateNewWaveOfOpponents();
   }
   glutPostRedisplay();
+}
+
+void activateNuke(){
+  score += opponents.size();
+  opponents.clear();
+  nukeMode = false;
+  nuke.isAirborne = false;
+  nuke.coordinates = new Coordinates(player.coordinates->x ,player.coordinates->y,player.coordinates->z);
 }
 
 void generateNewWaveOfOpponents() {
@@ -198,22 +205,19 @@ void generateNewWaveOfOpponents() {
   }
 }
 
-void drawNuke() {
+void drawNuke(Bullet &bullet) {
 	glPushMatrix();
-	glTranslated(nuke.coordinates->x, nuke.coordinates->y, nuke.coordinates->z);
+	glTranslated(bullet.coordinates->x, bullet.coordinates->y, bullet.coordinates->z);
 	glScaled(0.05, 0.05, 0.05);
 	model_bomb.Draw();
 	glPopMatrix();
 }
 
-bool propelNuke() {
-	if(nuke.isAirborne)
-		nuke.coordinates->z -= 0.07;
+bool propelNuke(Bullet &bullet) {
+	if(bullet.isAirborne)
+		bullet.coordinates->z -= 0.07;
 
-	if(nuke.coordinates->z < -3)
-		return true;
-
-	return false;
+  return bullet.coordinates->z < -3;
 }
 
 void drawGameOver() {
@@ -347,7 +351,6 @@ void LoadAssets() {
   model_token.Load("models/token3d/token.3DS");
   model_bomb.Load("models/bomb3d/Files/Bomb.3dS");
   tex.Load("img/stars.bmp"); // Loads a bitmap
-
 }
 
 // HANDLERS
@@ -375,7 +378,6 @@ void keyboardHandler(unsigned char k, int x, int y) {
   if (k == 'd')
     observerCoordinates.x++;
   if (k == ' ' && !gameOver) {
-   
     if (threeBulletsMode) {
       player.bullets.push_back(Bullet(true, player.coordinates->x,
                                     player.coordinates->y,
@@ -391,7 +393,6 @@ void keyboardHandler(unsigned char k, int x, int y) {
       nuke.coordinates->x = player.coordinates->x;
       nuke.coordinates->y = player.coordinates->y;
       nuke.coordinates->z = player.coordinates->z;
-	    // nukeMode = false;
     }else{
       player.bullets.push_back(Bullet(true, player.coordinates->x,
                                     player.coordinates->y,
@@ -671,7 +672,6 @@ void generateToken(int val) {
   int sign = rand() % 2;
   if (!gameOver) {
     int tokenType = rand() % 4;
-    tokenType = 1;    
     float xCoordinate = rand() % 4;
     Token token(true, tokenType, (sign == 0) ? xCoordinate : -xCoordinate, 0,
                 -7);
