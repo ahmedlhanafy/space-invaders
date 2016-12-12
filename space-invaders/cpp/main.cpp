@@ -83,6 +83,7 @@ const int CAMERA_MODE_TWO = 1;
 const int CAMERA_MODE_THREE = 2;
 bool threeBulletsMode = false;
 bool nukeMode = false;
+bool reverseDirectionMode = true;
 // DISPLAY & ANIMATION
 
 void display() {
@@ -265,14 +266,26 @@ void keyboardHandler(unsigned char k, int x, int y) {
 void specialKeyboardHandler(int k, int x, int y) {
 	if(!gameOver) {
 	  if(k == GLUT_KEY_RIGHT) {
-		player.coordinates->x += 0.15;
-		if(player.rotation->angle <= 45)
-		  player.rotation->angle += 15;
+		  if(reverseDirectionMode) {
+			player.coordinates->x -= 0.15;
+			if(player.rotation->angle >= -45)
+			  player.rotation->angle -= 15;
+		  } else {
+			player.coordinates->x += 0.15;
+			if(player.rotation->angle <= 45)
+			  player.rotation->angle += 15;
+		  }
 	  }
 	  if(k == GLUT_KEY_LEFT) {
-		player.coordinates->x -= 0.15;
-		if(player.rotation->angle >= -45)
-		  player.rotation->angle -= 15;
+		  if(reverseDirectionMode) {
+			player.coordinates->x += 0.15;
+			if(player.rotation->angle <= 45)
+			  player.rotation->angle += 15;
+		  } else {
+			player.coordinates->x -= 0.15;
+			if(player.rotation->angle >= -45)
+			  player.rotation->angle -= 15;
+		  }
 	  }
 	}
 }
