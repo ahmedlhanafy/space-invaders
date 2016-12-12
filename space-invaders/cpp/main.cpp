@@ -64,7 +64,7 @@ const int WINDOW_POSITION_X = 150;
 const int WINDOW_POSITION_Y = 150;
 
 int opponentsCount = 5;
-int opponentsBulletFiringDelay = 1;
+int opponentsBulletFiringDelay = 2;
 double opponentsSpeed = 0.001;
 
 // VARIABLE CONFIGURATIONS
@@ -133,9 +133,9 @@ void animation() {
     double yLowerLimit = 3;
     double zLowerLimit = 5;
 
-    observerCoordinates.x -= observerCoordinates.x <= xLowerLimit ? 0 : 0.022;
+    observerCoordinates.x -= observerCoordinates.x <= xLowerLimit ? 0 : 0.036;
     observerCoordinates.y -= observerCoordinates.y <= yLowerLimit ? 0 : 0.022;
-    observerCoordinates.z -= observerCoordinates.z <= zLowerLimit ? 0 : 0.006;
+    observerCoordinates.z -= observerCoordinates.z <= zLowerLimit ? 0 : 0.007;
 
     if (observerCoordinates.x <= xLowerLimit &&
         observerCoordinates.y <= yLowerLimit &&
@@ -195,8 +195,7 @@ void drawGameOver() {
   glLoadIdentity();
   glRasterPos2i(WINDOW_WIDTH / 2 - 40, WINDOW_HEIGHT / 2);
   string s = "Game Over";
-  void *font = GLUT_BITMAP_9_BY_15;
-  glScaled(200, 200, 200);
+  void *font = GLUT_BITMAP_HELVETICA_18;
   for (string::iterator i = s.begin(); i != s.end(); ++i) {
     char c = *i;
     glutBitmapCharacter(font, c);
@@ -204,6 +203,7 @@ void drawGameOver() {
   glMatrixMode(GL_MODELVIEW);
   glPopMatrix();
   glPopMatrix();
+
   glEnable(GL_TEXTURE_2D);
 }
 
@@ -220,8 +220,7 @@ void drawScoreAndLevel(int score, int level) {
   std::ostringstream o;
   o << "Score: " << score << " | Level: " << level;
   string s = o.str();
-  glScaled(200, 200, 200);
-  void *font = GLUT_BITMAP_9_BY_15;
+  void *font = GLUT_BITMAP_HELVETICA_18;
   for (string::iterator i = s.begin(); i != s.end(); ++i) {
     char c = *i;
     glutBitmapCharacter(font, c);
@@ -229,6 +228,7 @@ void drawScoreAndLevel(int score, int level) {
   glMatrixMode(GL_MODELVIEW);
   glPopMatrix();
   glPopMatrix();
+
   glEnable(GL_TEXTURE_2D);
 }
 
@@ -355,6 +355,7 @@ void keyboardHandler(unsigned char k, int x, int y) {
     if (nukeMode) {
       score += opponents.size();
       opponents.clear();
+	  nukeMode = false;
     }
     PlaySound("audio/playerShoots.wav", NULL, SND_ASYNC | SND_FILENAME);
   }
@@ -523,7 +524,7 @@ void propelSpaceshipBullets(Spaceship &spaceship) {
 void transformTokens(vector<Token> &tokens) {
   for (unsigned int i = 0; i < tokens.size(); i++) {
     if (tokens[i].isAirborne)
-      tokens[i].coordinates->z += 0.002;
+      tokens[i].coordinates->z += 0.004;
   }
 }
 
@@ -630,13 +631,13 @@ void generateToken(int val) {
   int sign = rand() % 2;
   if (!gameOver) {
     int tokenType = rand() % 4;
-    float xCoordinate = rand() % 7;
+    float xCoordinate = rand() % 4;
     Token token(true, tokenType, (sign == 0) ? xCoordinate : -xCoordinate, 0,
                 -7);
     tokens.push_back(token);
     drawToken(token);
     glutPostRedisplay();
-    glutTimerFunc(30000, generateToken, 0);
+    glutTimerFunc(20000, generateToken, 0);
   }
 }
 // MAIN
