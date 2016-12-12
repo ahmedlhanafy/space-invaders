@@ -81,6 +81,10 @@ int cameraMode = 0;
 const int CAMERA_MODE_ONE = 0;
 const int CAMERA_MODE_TWO = 1;
 const int CAMERA_MODE_THREE = 2;
+bool threeBulletsMode = false;
+bool nukeMode = false;
+bool reverseDirectionMode = false;
+bool fasterFiringRateMode = false;
 // DISPLAY & ANIMATION
 
 void display() {
@@ -165,19 +169,36 @@ void tokenCaptured(Spaceship &spaceship, vector<Token> &tokens){
 			&& spaceshipCoordinates->x - 0.25 < tokenCoordinates->x
 			&& spaceshipCoordinates->x + 0.25 > tokenCoordinates->x && tokens[i].isAirborne){
 				tokens[i].isAirborne = false;
-				enableToken(tokens[i].type);
-				if (tokens[i].type == 0 ||tokens[i].type == 1)
+				if (tokens[i].type == 0 ||tokens[i].type == 1) {
 					PlaySound("audio/Bell.wav", NULL, SND_ASYNC | SND_FILENAME);
+				}
 				else 
 					PlaySound("audio/schade.wav", NULL, SND_ASYNC | SND_FILENAME);
+
+				enableToken(tokens[i].type);
+				glutTimerFunc(5000, disableToken, tokens[i].type);
+				break;
 			}		
 	}
 }
 
 void enableToken(int type){
-	//glutTimerFunc(30000, disableToken, type);
+	switch(type) {
+		case 0: threeBulletsMode = true; break;
+		case 1: nukeMode = true; break;
+		case 2: reverseDirectionMode = true; break;
+		case 3: fasterFiringRateMode = true; break;
+		default: break;
+	}
 }
 void disableToken(int type){
+	switch(type) {
+		case 0: threeBulletsMode = false; break;
+		case 1: nukeMode = false; break;
+		case 2: reverseDirectionMode = false; break;
+		case 3: fasterFiringRateMode = false; break;
+		default: break;
+	}
 }
 
 void LoadAssets() {
@@ -214,6 +235,14 @@ void keyboardHandler(unsigned char k, int x, int y) {
       observerCoordinates.x++;
   if(k == ' ' && !gameOver) {
     player.bullets.push_back(Bullet(true, player.coordinates->x, player.coordinates->y, player.coordinates->z));
+	if(threeBulletsMode) {
+		player.bullets.push_back(Bullet(true, player.coordinates->x + 0.5, player.coordinates->y, player.coordinates->z));
+		player.bullets.push_back(Bullet(true, player.coordinates->x - 0.5, player.coordinates->y, player.coordinates->z));
+	}
+	if(nukeMode) {
+		score += opponents.size();
+		opponents.clear();
+	}
     PlaySound("audio/playerShoots.wav", NULL, SND_ASYNC | SND_FILENAME);
   }
   if(k == 'c'){
@@ -242,14 +271,26 @@ void keyboardHandler(unsigned char k, int x, int y) {
 void specialKeyboardHandler(int k, int x, int y) {
 	if(!gameOver) {
 	  if(k == GLUT_KEY_RIGHT) {
-		player.coordinates->x += 0.15;
-		if(player.rotation->angle <= 45)
-		  player.rotation->angle += 15;
+		  if(reverseDirectionMode) {
+			player.coordinates->x -= 0.15;
+			if(player.rotation->angle >= -45)
+			  player.rotation->angle -= 15;
+		  } else {
+			player.coordinates->x += 0.15;
+			if(player.rotation->angle <= 45)
+			  player.rotation->angle += 15;
+		  }
 	  }
 	  if(k == GLUT_KEY_LEFT) {
-		player.coordinates->x -= 0.15;
-		if(player.rotation->angle >= -45)
-		  player.rotation->angle -= 15;
+		  if(reverseDirectionMode) {
+			player.coordinates->x += 0.15;
+			if(player.rotation->angle <= 45)
+			  player.rotation->angle += 15;
+		  } else {
+			player.coordinates->x -= 0.15;
+			if(player.rotation->angle >= -45)
+			  player.rotation->angle -= 15;
+		  }
 	  }
 	}
 }
@@ -348,7 +389,7 @@ void propelSpaceshipBullets(Spaceship &spaceship) {
   for (unsigned int i = 0; i < spaceship.bullets.size(); i++) {
     if(spaceship.bullets[i].isAirborne) {
 		if(spaceship.isHostile) {
-			spaceship.bullets[i].coordinates->z += 0.01;
+			spaceship.bullets[i].coordinates->z += fasterFiringRateMode? 0.03 : 0.01;
 			spaceship.bullets[i].rotation->angle = 90;
 			spaceship.bullets[i].rotation->y = -1;
 		} else {
@@ -457,10 +498,11 @@ vector<Spaceship> initializeOpponents(int opponentsCount){
 
 
 void generateToken(int val) {
+	int sign = rand() % 2;
 	if (!gameOver){
 		int tokenType = rand() % 4;
 		float xCoordinate = rand() % 7;
-		Token token(true, tokenType, xCoordinate,0,-7);
+		Token token(true, tokenType, (sign == 0)? xCoordinate : -xCoordinate,0,-7);
 		tokens.push_back(token);
 		drawToken(token);
 		glutPostRedisplay();						
