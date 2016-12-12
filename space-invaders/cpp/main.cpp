@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <time.h>
 #include <vector>
+#include <algorithm>
 #include <glut.h>
 #include "Coordinates.h"
 #include "Rotation.h"
@@ -129,10 +130,10 @@ void animation() {
       if(detectSpaceshipHit(opponents[i], player)){
         score++;
 		PlaySound("audio/Impact.wav", NULL, SND_ASYNC | SND_FILENAME);
-        opponents[i].coordinates = new Coordinates(-100, -100, -100);
         printf("%d\n", score);
       }
     }
+	opponents.erase(remove_if (opponents.begin(), opponents.end(), [](Spaceship &spaceship) {return spaceship.isHit;}), opponents.end());
 	transformTokens(tokens);
 	tokenCaptured(player, tokens);
   }
@@ -176,7 +177,7 @@ void tokenCaptured(Spaceship &spaceship, vector<Token> &tokens){
 					PlaySound("audio/schade.wav", NULL, SND_ASYNC | SND_FILENAME);
 
 				enableToken(tokens[i].type);
-				glutTimerFunc(5000, disableToken, tokens[i].type);
+				glutTimerFunc(10000, disableToken, tokens[i].type);
 				break;
 			}		
 	}
@@ -307,14 +308,12 @@ void specialKeyboardUpHandler(int k, int x, int y) {
 // DRAWABLES
 
 void drawOpponentSpaceship(Spaceship &spaceship) {
-  if(!spaceship.isHit) {
     glPushMatrix();
     glTranslated(spaceship.coordinates->x, spaceship.coordinates->y, spaceship.coordinates->z);
     glRotated(90, 0,-1,0);
     glScaled(0.02, 0.02, 0.02);
     model_spaceship_opponent.Draw();
     glPopMatrix();
-  }
 }
 
 void drawPlayerSpaceship(Spaceship &spaceship) {
