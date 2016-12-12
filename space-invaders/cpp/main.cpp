@@ -273,7 +273,6 @@ bool detectSpaceshipHit(Spaceship &spaceship1, Spaceship &spaceship2) {
     Coordinates *spaceship1Coordinates = spaceship1.coordinates;
     Coordinates *player2BulletCoordinates = spaceship2.bullets[i].coordinates;
 
-    // TODO: Make dimensions dynamic
     if ((int)player2BulletCoordinates->z == (int)spaceship1Coordinates->z &&
         spaceship1Coordinates->x - 0.25 < player2BulletCoordinates->x &&
         spaceship1Coordinates->x + 0.25 > player2BulletCoordinates->x &&
