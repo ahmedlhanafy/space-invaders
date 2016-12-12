@@ -133,9 +133,9 @@ void animation() {
     double yLowerLimit = 3;
     double zLowerLimit = 5;
 
-    observerCoordinates.x -= observerCoordinates.x <= xLowerLimit ? 0 : 0.022;
+    observerCoordinates.x -= observerCoordinates.x <= xLowerLimit ? 0 : 0.036;
     observerCoordinates.y -= observerCoordinates.y <= yLowerLimit ? 0 : 0.022;
-    observerCoordinates.z -= observerCoordinates.z <= zLowerLimit ? 0 : 0.006;
+    observerCoordinates.z -= observerCoordinates.z <= zLowerLimit ? 0 : 0.007;
 
     if (observerCoordinates.x <= xLowerLimit &&
         observerCoordinates.y <= yLowerLimit &&
