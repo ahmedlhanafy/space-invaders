@@ -84,6 +84,7 @@ const int CAMERA_MODE_THREE = 2;
 bool threeBulletsMode = false;
 bool nukeMode = false;
 bool reverseDirectionMode = false;
+bool fasterFiringRateMode = true;
 // DISPLAY & ANIMATION
 
 void display() {
@@ -386,7 +387,7 @@ void propelSpaceshipBullets(Spaceship &spaceship) {
   for (unsigned int i = 0; i < spaceship.bullets.size(); i++) {
     if(spaceship.bullets[i].isAirborne) {
 		if(spaceship.isHostile) {
-			spaceship.bullets[i].coordinates->z += 0.01;
+			spaceship.bullets[i].coordinates->z += fasterFiringRateMode? 0.03 : 0.01;
 			spaceship.bullets[i].rotation->angle = 90;
 			spaceship.bullets[i].rotation->y = -1;
 		} else {
