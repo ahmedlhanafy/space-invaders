@@ -193,7 +193,6 @@ void activateNuke(){
   nukeMode = false;
   nuke.isAirborne = false;
   nuke.coordinates = new Coordinates(player.coordinates->x ,player.coordinates->y,player.coordinates->z);
-  PlaySound("audio/atomicBomb.wav", NULL, SND_ASYNC | SND_FILENAME);
 }
 
 void generateNewWaveOfOpponents() {
@@ -216,7 +215,7 @@ void drawNuke(Bullet &bullet) {
 
 bool propelNuke(Bullet &bullet) {
 	if(bullet.isAirborne)
-		bullet.coordinates->z -= 0.07;
+		bullet.coordinates->z -= 0.02;
 
   return bullet.coordinates->z < -3;
 }
@@ -389,17 +388,19 @@ void keyboardHandler(unsigned char k, int x, int y) {
       player.bullets.push_back(Bullet(true, player.coordinates->x - 0.5,
                                       player.coordinates->y,
                                       player.coordinates->z));
+    PlaySound("audio/playerShoots.wav", NULL, SND_ASYNC | SND_FILENAME);                                      
     }else if (nukeMode) {
+      PlaySound("audio/atomicBomb.wav", NULL, SND_ASYNC | SND_FILENAME);      
       nuke.isAirborne = true;
       nuke.coordinates->x = player.coordinates->x;
       nuke.coordinates->y = player.coordinates->y;
       nuke.coordinates->z = player.coordinates->z;
     }else{
+    PlaySound("audio/playerShoots.wav", NULL, SND_ASYNC | SND_FILENAME);      
       player.bullets.push_back(Bullet(true, player.coordinates->x,
                                     player.coordinates->y,
                                     player.coordinates->z));
     }
-    PlaySound("audio/playerShoots.wav", NULL, SND_ASYNC | SND_FILENAME);
   }
   if (k == 'c') {
     cameraMode++;
@@ -673,7 +674,6 @@ void generateToken(int val) {
   int sign = rand() % 2;
   if (!gameOver) {
     int tokenType = rand() % 4;
-    tokenType = 1;
     float xCoordinate = rand() % 4;
     Token token(true, tokenType, (sign == 0) ? xCoordinate : -xCoordinate, 0,
                 -7);
