@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <time.h>
 #include <vector>
+#include <algorithm>
 #include <glut.h>
 #include "Coordinates.h"
 #include "Rotation.h"
@@ -38,13 +39,20 @@ void specialKeyboardUpHandler(int k, int x, int y);
 void drawPlayerSpaceship(Spaceship &spaceship);
 void drawOpponentSpaceship(Spaceship &spaceship);
 void drawBullet(Bullet &bullet);
+void drawToken(Token &token);
+void drawAirborneTokens(vector<Token> &tokens);
 void drawSpaceshipBullets(Spaceship &spaceship);
 void transformOpponent(Spaceship &spaceship,int randomNumber, int opponentsCount);
 void propelSpaceshipBullets(Spaceship &spaceship);
+void transformTokens(vector<Token> &tokens);
 void shootBlankOrLiveBullet(Spaceship &spaceship, int index);
 bool detectSpaceshipHit(Spaceship &player, Spaceship &opponent);
 void drawSkybox();
 vector<Spaceship> initializeOpponents(int opponentsCount, int levelOfGame);
+void tokenCaptured(Spaceship &spaceship, vector<Token> &tokens);
+void enableToken(int type);
+void disableToken(int type);
+
 // FIXED CONFIGURATIONS
 
 int WINDOW_WIDTH = 1080;
@@ -71,7 +79,7 @@ Coordinates mouseCoordinates(0, 0, 0);
 
 Spaceship player(false, 0, 0, 2.5, 0, 0, 0, 0);
 vector<Spaceship> opponents;
-Token token(1, 0,0,0);
+vector<Token> tokens;
 
 Coordinates spotlights(0, 0, 0);
 
@@ -84,9 +92,11 @@ int cameraMode = 0;
 const int CAMERA_MODE_ONE = 0;
 const int CAMERA_MODE_TWO = 1;
 const int CAMERA_MODE_THREE = 2;
-
 bool entranceAnimation = true;
-
+bool threeBulletsMode = false;
+bool nukeMode = false;
+bool reverseDirectionMode = false;
+bool fasterFiringRateMode = false;
 // DISPLAY & ANIMATION
 
 void display() {
@@ -96,14 +106,16 @@ void display() {
 
   drawPlayerSpaceship(player);
   drawSpaceshipBullets(player);
+  
+  drawAirborneTokens(tokens);
 
   for (unsigned int i = 0; i < opponents.size(); i++) {
     drawOpponentSpaceship(opponents[i]);
     drawSpaceshipBullets(opponents[i]);
   }
-  
+
   /* This has to be the last method to be called in display method
-    because it converts the drawing to be 2D 
+    because it converts the drawing to be 2D
   */
   drawScoreAndLevel(score, level);
   if(gameOver) drawGameOver();
@@ -116,11 +128,11 @@ void animation() {
     double xLowerLimit = 0;
     double yLowerLimit = 3;
     double zLowerLimit = 5;
-    
-    observerCoordinates.x -= observerCoordinates.x <= xLowerLimit? 0 : 0.022; 
-    observerCoordinates.y -= observerCoordinates.y <= yLowerLimit? 0 : 0.022; 
-    observerCoordinates.z -= observerCoordinates.z <= zLowerLimit? 0 : 0.006; 
-    
+
+    observerCoordinates.x -= observerCoordinates.x <= xLowerLimit? 0 : 0.022;
+    observerCoordinates.y -= observerCoordinates.y <= yLowerLimit? 0 : 0.022;
+    observerCoordinates.z -= observerCoordinates.z <= zLowerLimit? 0 : 0.006;
+
     if(observerCoordinates.x <= xLowerLimit && observerCoordinates.y <= yLowerLimit && observerCoordinates.z <= zLowerLimit){
       entranceAnimation = false;
     }
@@ -133,37 +145,38 @@ void animation() {
 
         if(detectSpaceshipHit(player, opponents[i])) {
           gameOver = true;
-      }
+        }
 
         if(detectSpaceshipHit(opponents[i], player)){
           score++;
           PlaySound("audio/Impact.wav", NULL, SND_ASYNC | SND_FILENAME);
-          opponents[i].coordinates = new Coordinates(-100, -100, -100);
           printf("%d\n", score);
         }
-      }
     }
-    propelSpaceshipBullets(player);
-    for (unsigned int i = 0; i < opponents.size(); i++) {
-      propelSpaceshipBullets(opponents[i]);
-    }
-
-    generateNewWaveOfOpponents();
+    opponents.erase(remove_if (opponents.begin(), opponents.end(), [](Spaceship &spaceship) {return spaceship.isHit;}), opponents.end());
+    transformTokens(tokens);
+    tokenCaptured(player, tokens);
   }
-
+  propelSpaceshipBullets(player);
+  for (unsigned int i = 0; i < opponents.size(); i++) {
+    propelSpaceshipBullets(opponents[i]);
+  }
+  generateNewWaveOfOpponents();
+  }  
   glutPostRedisplay();
 }
 
 void generateNewWaveOfOpponents(){
-  bool allKilled = false;
-  // Check if all opponents are killed
-  for (unsigned int i = 0; i < opponents.size(); i++) {
-    if(!opponents[i].isHit){
-      allKilled = false;
-      break;
-    }
-    allKilled = true;
-  }
+  bool allKilled = opponents.empty();
+  // if(opponents.size() == 0
+  // // Check if all opponents are killed
+  // for (unsigned int i = 0; i < opponents.size(); i++) {
+  //   if(!opponents[i].isHit){
+  //     allKilled = false;
+  //     break;
+  //   }
+  //   allKilled = true;
+  // }
   if(allKilled){
     opponentsCount += 4;
     opponentsBulletFiringDelay += 1;
@@ -174,7 +187,7 @@ void generateNewWaveOfOpponents(){
 }
 
 void drawGameOver(){
-  glDisable(GL_TEXTURE_2D); 
+  glDisable(GL_TEXTURE_2D);
   glMatrixMode(GL_PROJECTION);
   glPushMatrix();
   glLoadIdentity();
@@ -182,15 +195,15 @@ void drawGameOver(){
   glMatrixMode(GL_MODELVIEW);
   glPushMatrix();
   glLoadIdentity();
-  glRasterPos2i(WINDOW_WIDTH/2 - 40, WINDOW_HEIGHT/ 2);  
+  glRasterPos2i(WINDOW_WIDTH/2 - 40, WINDOW_HEIGHT/ 2);
   string s = "Game Over";
   void * font = GLUT_BITMAP_9_BY_15;
-  glScaled(200,200,200);  
+  glScaled(200,200,200);
   for (string::iterator i = s.begin(); i != s.end(); ++i){
     char c = *i;
     glutBitmapCharacter(font, c);
   }
-  glMatrixMode(GL_MODELVIEW); 
+  glMatrixMode(GL_MODELVIEW);
   glPopMatrix();
   glPopMatrix();
   glEnable(GL_TEXTURE_2D);
@@ -198,7 +211,7 @@ void drawGameOver(){
 
 
 void drawScoreAndLevel(int score, int level){
-  glDisable(GL_TEXTURE_2D); 
+  glDisable(GL_TEXTURE_2D);
   glMatrixMode(GL_PROJECTION);
   glPushMatrix();
   glLoadIdentity();
@@ -206,7 +219,7 @@ void drawScoreAndLevel(int score, int level){
   glMatrixMode(GL_MODELVIEW);
   glPushMatrix();
   glLoadIdentity();
-  glRasterPos2i(10, 10);  
+  glRasterPos2i(10, 10);
   std::ostringstream o;
   o << "Score: " << score << " | Level: " << level;
   string s = o.str();
@@ -216,7 +229,7 @@ void drawScoreAndLevel(int score, int level){
     char c = *i;
     glutBitmapCharacter(font, c);
   }
-  glMatrixMode(GL_MODELVIEW); 
+  glMatrixMode(GL_MODELVIEW);
   glPopMatrix();
   glPopMatrix();
   glEnable(GL_TEXTURE_2D);
@@ -230,14 +243,54 @@ bool detectSpaceshipHit(Spaceship &spaceship1, Spaceship &spaceship2) {
 		// TODO: Make dimensions dynamic
 		if((int)player2BulletCoordinates->z == (int)spaceship1Coordinates->z
 		&& spaceship1Coordinates->x - 0.25 < player2BulletCoordinates->x
-		&& spaceship1Coordinates->x + 0.25 > player2BulletCoordinates->x) {
-			spaceship2.bullets[i].coordinates = new Coordinates(500, 500, 500);
+		&& spaceship1Coordinates->x + 0.25 > player2BulletCoordinates->x
+		&& spaceship2.bullets[i].isAirborne) {
+			spaceship2.bullets[i].isAirborne = false;
 			spaceship1.isHit = true;
 			return true;
 		}
 	}
-
 	return false;
+}
+
+void tokenCaptured(Spaceship &spaceship, vector<Token> &tokens){
+	for (unsigned int i = 0; i < tokens.size(); i++) {
+			Coordinates* spaceshipCoordinates = spaceship.coordinates;
+			Coordinates* tokenCoordinates = tokens[i].coordinates;
+			if((int)spaceshipCoordinates->z == (int)tokenCoordinates->z
+			&& spaceshipCoordinates->x - 0.25 < tokenCoordinates->x
+			&& spaceshipCoordinates->x + 0.25 > tokenCoordinates->x && tokens[i].isAirborne){
+				tokens[i].isAirborne = false;
+				if (tokens[i].type == 0 ||tokens[i].type == 1) {
+					PlaySound("audio/Bell.wav", NULL, SND_ASYNC | SND_FILENAME);
+				}
+				else
+					PlaySound("audio/schade.wav", NULL, SND_ASYNC | SND_FILENAME);
+
+				enableToken(tokens[i].type);
+				glutTimerFunc(10000, disableToken, tokens[i].type);
+				break;
+			}
+	}
+}
+
+void enableToken(int type){
+	switch(type) {
+		case 0: threeBulletsMode = true; break;
+		case 1: nukeMode = true; break;
+		case 2: reverseDirectionMode = true; break;
+		case 3: fasterFiringRateMode = true; break;
+		default: break;
+	}
+}
+void disableToken(int type){
+	switch(type) {
+		case 0: threeBulletsMode = false; break;
+		case 1: nukeMode = false; break;
+		case 2: reverseDirectionMode = false; break;
+		case 3: fasterFiringRateMode = false; break;
+		default: break;
+	}
 }
 
 void LoadAssets() {
@@ -274,6 +327,14 @@ void keyboardHandler(unsigned char k, int x, int y) {
       observerCoordinates.x++;
   if(k == ' ' && !gameOver) {
     player.bullets.push_back(Bullet(true, player.coordinates->x, player.coordinates->y, player.coordinates->z));
+	if(threeBulletsMode) {
+		player.bullets.push_back(Bullet(true, player.coordinates->x + 0.5, player.coordinates->y, player.coordinates->z));
+		player.bullets.push_back(Bullet(true, player.coordinates->x - 0.5, player.coordinates->y, player.coordinates->z));
+	}
+	if(nukeMode) {
+		score += opponents.size();
+		opponents.clear();
+	}
     PlaySound("audio/playerShoots.wav", NULL, SND_ASYNC | SND_FILENAME);
   }
   if(k == 'c'){
@@ -281,17 +342,17 @@ void keyboardHandler(unsigned char k, int x, int y) {
     if(cameraMode > CAMERA_MODE_THREE) cameraMode = 0;
 
     if(cameraMode == CAMERA_MODE_ONE){
-      observerCoordinates.y = -1.0;      
+      observerCoordinates.y = -1.0;
       observerCoordinates.y = 3.0;
       observerCoordinates.z = 5.0;
     }
     else if(cameraMode == CAMERA_MODE_TWO){
-      observerCoordinates.y = -1.0;      
+      observerCoordinates.y = -1.0;
       observerCoordinates.y = 3.0;
       observerCoordinates.z = 9.0;
     }
     else if(cameraMode == CAMERA_MODE_THREE){
-      observerCoordinates.y = -1.0;      
+      observerCoordinates.y = -1.0;
       observerCoordinates.y = 10.0;
       observerCoordinates.z = 3.0;
     }
@@ -302,14 +363,26 @@ void keyboardHandler(unsigned char k, int x, int y) {
 void specialKeyboardHandler(int k, int x, int y) {
 	if(!gameOver) {
 	  if(k == GLUT_KEY_RIGHT) {
-		player.coordinates->x += 0.15;
-		if(player.rotation->angle <= 45)
-		  player.rotation->angle += 15;
+		  if(reverseDirectionMode) {
+			player.coordinates->x -= 0.15;
+			if(player.rotation->angle >= -45)
+			  player.rotation->angle -= 15;
+		  } else {
+			player.coordinates->x += 0.15;
+			if(player.rotation->angle <= 45)
+			  player.rotation->angle += 15;
+		  }
 	  }
 	  if(k == GLUT_KEY_LEFT) {
-		player.coordinates->x -= 0.15;
-		if(player.rotation->angle >= -45)
-		  player.rotation->angle -= 15;
+		  if(reverseDirectionMode) {
+			player.coordinates->x += 0.15;
+			if(player.rotation->angle <= 45)
+			  player.rotation->angle += 15;
+		  } else {
+			player.coordinates->x -= 0.15;
+			if(player.rotation->angle >= -45)
+			  player.rotation->angle -= 15;
+		  }
 	  }
 	}
 }
@@ -326,14 +399,12 @@ void specialKeyboardUpHandler(int k, int x, int y) {
 // DRAWABLES
 
 void drawOpponentSpaceship(Spaceship &spaceship) {
-  if(!spaceship.isHit) {
     glPushMatrix();
     glTranslated(spaceship.coordinates->x, spaceship.coordinates->y, spaceship.coordinates->z);
     glRotated(90, 0,-1,0);
     glScaled(0.02, 0.02, 0.02);
     model_spaceship_opponent.Draw();
     glPopMatrix();
-  }
 }
 
 void drawPlayerSpaceship(Spaceship &spaceship) {
@@ -352,21 +423,28 @@ void drawBullet(Bullet &bullet) {
   glRotated(bullet.rotation->angle, bullet.rotation->x, bullet.rotation->y, bullet.rotation->z);
   model_bullet.Draw();
   glPopMatrix();
-
 }
 
 void drawSpaceshipBullets(Spaceship &spaceship) {
   for (unsigned int i = 0; i < spaceship.bullets.size(); i++) {
-    drawBullet(spaceship.bullets[i]);
+	  if (spaceship.bullets[i].isAirborne)
+		drawBullet(spaceship.bullets[i]);
   }
 }
 
 void drawToken(Token &token){
   glPushMatrix();
   glTranslated(token.coordinates->x, token.coordinates->y, token.coordinates->z);
-  glScaled(0.0009, 0.0009, 0.0009);
+  glScaled(0.0002, 0.0001, 0.0004);
   model_token.Draw();
   glPopMatrix();
+}
+
+void drawAirborneTokens(vector<Token> &tokens){
+	for (unsigned int i = 0; i < tokens.size(); i++) {
+		if (tokens[i].isAirborne)
+			drawToken(tokens[i]);
+  }
 }
 
 void drawSkybox() {
@@ -401,7 +479,7 @@ void propelSpaceshipBullets(Spaceship &spaceship) {
   for (unsigned int i = 0; i < spaceship.bullets.size(); i++) {
     if(spaceship.bullets[i].isAirborne) {
 		if(spaceship.isHostile) {
-			spaceship.bullets[i].coordinates->z += 0.01;
+			spaceship.bullets[i].coordinates->z += fasterFiringRateMode? 0.03 : 0.01;
 			spaceship.bullets[i].rotation->angle = 90;
 			spaceship.bullets[i].rotation->y = -1;
 		} else {
@@ -410,6 +488,13 @@ void propelSpaceshipBullets(Spaceship &spaceship) {
 			spaceship.bullets[i].rotation->y = 1;
 		}
     }
+  }
+}
+
+void transformTokens(vector<Token> &tokens){
+	for (unsigned int i = 0; i < tokens.size(); i++) {
+		if (tokens[i].isAirborne)
+			tokens[i].coordinates->z += 0.002;
   }
 }
 
@@ -423,6 +508,7 @@ void shootBlankOrLiveBullet(Spaceship &spaceship, int index) {
     }
   }
 }
+
 
 // CAMERA & LIGHTS
 
@@ -498,13 +584,26 @@ vector<Spaceship> initializeOpponents(int opponentsCount, int levelOfGame){
     }else if(levelOfGame <= 2){
       zCoordinate  = i % 2 == 0? -3: -1;
     }else {
-      zCoordinate  = i % 2 == 0? -3: i % 3 == 0? -1: -4.5;      
+      zCoordinate  = i % 2 == 0? -3: i % 3 == 0? -1: -4.5;
     }
     opponents.push_back(Spaceship(true, xCoordinate, 0, zCoordinate, 0, 0, 0, 0));
   }
   return opponents;
 }
 
+
+void generateToken(int val) {
+	int sign = rand() % 2;
+	if (!gameOver){
+		int tokenType = rand() % 4;
+		float xCoordinate = rand() % 7;
+		Token token(true, tokenType, (sign == 0)? xCoordinate : -xCoordinate,0,-7);
+		tokens.push_back(token);
+		drawToken(token);
+		glutPostRedisplay();
+		glutTimerFunc(30000,generateToken,0);
+	}
+}
 // MAIN
 
 int main(int argc, char** argv) {
@@ -521,6 +620,7 @@ int main(int argc, char** argv) {
   glutKeyboardFunc(keyboardHandler);
   glutSpecialFunc(specialKeyboardHandler);
   glutSpecialUpFunc(specialKeyboardUpHandler);
+  glutTimerFunc(10000,generateToken,0);
   glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
   glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
   glEnable(GL_DEPTH_TEST);

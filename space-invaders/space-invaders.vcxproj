@@ -17,8 +17,10 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="audio\atomicBomb.wav" />
+    <None Include="audio\Bell.wav" />
     <None Include="audio\Impact.wav" />
     <None Include="audio\playerShoots.wav" />
+    <None Include="audio\schade.wav" />
     <None Include="img\stars.bmp" />
   </ItemGroup>
   <ItemGroup>

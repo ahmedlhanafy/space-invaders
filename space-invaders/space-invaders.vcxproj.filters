@@ -38,6 +38,12 @@
     <None Include="audio\playerShoots.wav">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="audio\Bell.wav">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="audio\schade.wav">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="cpp\Bullet.h">
