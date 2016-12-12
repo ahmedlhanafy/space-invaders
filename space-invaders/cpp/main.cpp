@@ -54,7 +54,8 @@ vector<Spaceship> initializeOpponents(int opponentsCount, int levelOfGame);
 void tokenCaptured(Spaceship &spaceship, vector<Token> &tokens);
 void enableToken(int type);
 void disableToken(int type);
-
+void drawNuke();
+bool propelNuke();
 // FIXED CONFIGURATIONS
 
 int WINDOW_WIDTH = 1080;
@@ -73,6 +74,7 @@ Model_3DS model_spaceship_player;
 Model_3DS model_spaceship_opponent;
 Model_3DS model_bullet;
 Model_3DS model_token;
+Model_3DS model_bomb;
 bool gameOver = false;
 
 Coordinates observedCoordinates(0, 0, 0);
@@ -84,6 +86,7 @@ vector<Spaceship> opponents;
 vector<Token> tokens;
 
 Coordinates spotlights(0, 0, 0);
+Bullet nuke(false, 0, 0, 0);
 
 int score = 0;
 
@@ -116,6 +119,8 @@ void display() {
     drawOpponentSpaceship(opponents[i]);
     drawSpaceshipBullets(opponents[i]);
   }
+  if(nuke.isAirborne && nukeMode)
+	  drawNuke();
 
   /* This has to be the last method to be called in display method
   because it converts the drawing to be 2D
@@ -166,6 +171,15 @@ void animation() {
       tokenCaptured(player, tokens);
     }
     propelSpaceshipBullets(player);
+
+	  if(nukeMode && propelNuke()){
+      score += opponents.size();
+      opponents.clear();
+      nukeMode = false;
+      nuke.isAirborne = false;
+      nuke.coordinates = new Coordinates(player.coordinates->x ,player.coordinates->y,player.coordinates->z);
+    }
+
     for (unsigned int i = 0; i < opponents.size(); i++) {
       propelSpaceshipBullets(opponents[i]);
     }
@@ -182,6 +196,24 @@ void generateNewWaveOfOpponents() {
     opponents = initializeOpponents(opponentsCount, level);
     level++;
   }
+}
+
+void drawNuke() {
+	glPushMatrix();
+	glTranslated(nuke.coordinates->x, nuke.coordinates->y, nuke.coordinates->z);
+	glScaled(0.05, 0.05, 0.05);
+	model_bomb.Draw();
+	glPopMatrix();
+}
+
+bool propelNuke() {
+	if(nuke.isAirborne)
+		nuke.coordinates->z -= 0.07;
+
+	if(nuke.coordinates->z < -3)
+		return true;
+
+	return false;
 }
 
 void drawGameOver() {
@@ -313,7 +345,9 @@ void LoadAssets() {
   model_spaceship_opponent.Load("models/opponent3d/fighter.3DS");
   model_bullet.Load("models/bullet3d/Bullet.3DS");
   model_token.Load("models/token3d/token.3DS");
+  model_bomb.Load("models/bomb3d/Files/Bomb.3dS");
   tex.Load("img/stars.bmp"); // Loads a bitmap
+
 }
 
 // HANDLERS
@@ -341,21 +375,27 @@ void keyboardHandler(unsigned char k, int x, int y) {
   if (k == 'd')
     observerCoordinates.x++;
   if (k == ' ' && !gameOver) {
-    player.bullets.push_back(Bullet(true, player.coordinates->x,
+   
+    if (threeBulletsMode) {
+      player.bullets.push_back(Bullet(true, player.coordinates->x,
                                     player.coordinates->y,
                                     player.coordinates->z));
-    if (threeBulletsMode) {
       player.bullets.push_back(Bullet(true, player.coordinates->x + 0.5,
                                       player.coordinates->y,
                                       player.coordinates->z));
       player.bullets.push_back(Bullet(true, player.coordinates->x - 0.5,
                                       player.coordinates->y,
                                       player.coordinates->z));
-    }
-    if (nukeMode) {
-      score += opponents.size();
-      opponents.clear();
-	  nukeMode = false;
+    }else if (nukeMode) {
+      nuke.isAirborne = true;
+      nuke.coordinates->x = player.coordinates->x;
+      nuke.coordinates->y = player.coordinates->y;
+      nuke.coordinates->z = player.coordinates->z;
+	    // nukeMode = false;
+    }else{
+      player.bullets.push_back(Bullet(true, player.coordinates->x,
+                                    player.coordinates->y,
+                                    player.coordinates->z));
     }
     PlaySound("audio/playerShoots.wav", NULL, SND_ASYNC | SND_FILENAME);
   }
@@ -631,6 +671,7 @@ void generateToken(int val) {
   int sign = rand() % 2;
   if (!gameOver) {
     int tokenType = rand() % 4;
+    tokenType = 1;    
     float xCoordinate = rand() % 4;
     Token token(true, tokenType, (sign == 0) ? xCoordinate : -xCoordinate, 0,
                 -7);
