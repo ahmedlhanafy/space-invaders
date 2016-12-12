@@ -82,6 +82,7 @@ const int CAMERA_MODE_ONE = 0;
 const int CAMERA_MODE_TWO = 1;
 const int CAMERA_MODE_THREE = 2;
 bool threeBulletsMode = false;
+bool nukeMode = true;
 // DISPLAY & ANIMATION
 
 void display() {
@@ -229,6 +230,10 @@ void keyboardHandler(unsigned char k, int x, int y) {
 	if(threeBulletsMode) {
 		player.bullets.push_back(Bullet(true, player.coordinates->x + 0.5, player.coordinates->y, player.coordinates->z));
 		player.bullets.push_back(Bullet(true, player.coordinates->x - 0.5, player.coordinates->y, player.coordinates->z));
+	}
+	if(nukeMode) {
+		score += opponents.size();
+		opponents.clear();
 	}
     PlaySound("audio/playerShoots.wav", NULL, SND_ASYNC | SND_FILENAME);
   }
