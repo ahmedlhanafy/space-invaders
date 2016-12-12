@@ -84,7 +84,7 @@ const int CAMERA_MODE_THREE = 2;
 bool threeBulletsMode = false;
 bool nukeMode = false;
 bool reverseDirectionMode = false;
-bool fasterFiringRateMode = true;
+bool fasterFiringRateMode = false;
 // DISPLAY & ANIMATION
 
 void display() {
@@ -187,6 +187,7 @@ void enableToken(int type){
 		case 0: threeBulletsMode = true; break;
 		case 1: nukeMode = true; break;
 		case 2: reverseDirectionMode = true; break;
+		case 3: fasterFiringRateMode = true; break;
 		default: break;
 	}
 }
@@ -195,6 +196,7 @@ void disableToken(int type){
 		case 0: threeBulletsMode = false; break;
 		case 1: nukeMode = false; break;
 		case 2: reverseDirectionMode = false; break;
+		case 3: fasterFiringRateMode = false; break;
 		default: break;
 	}
 }
