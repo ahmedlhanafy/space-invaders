@@ -355,6 +355,7 @@ void keyboardHandler(unsigned char k, int x, int y) {
     if (nukeMode) {
       score += opponents.size();
       opponents.clear();
+	  nukeMode = false;
     }
     PlaySound("audio/playerShoots.wav", NULL, SND_ASYNC | SND_FILENAME);
   }
@@ -523,7 +524,7 @@ void propelSpaceshipBullets(Spaceship &spaceship) {
 void transformTokens(vector<Token> &tokens) {
   for (unsigned int i = 0; i < tokens.size(); i++) {
     if (tokens[i].isAirborne)
-      tokens[i].coordinates->z += 0.002;
+      tokens[i].coordinates->z += 0.004;
   }
 }
 
@@ -630,13 +631,13 @@ void generateToken(int val) {
   int sign = rand() % 2;
   if (!gameOver) {
     int tokenType = rand() % 4;
-    float xCoordinate = rand() % 7;
+    float xCoordinate = rand() % 4;
     Token token(true, tokenType, (sign == 0) ? xCoordinate : -xCoordinate, 0,
                 -7);
     tokens.push_back(token);
     drawToken(token);
     glutPostRedisplay();
-    glutTimerFunc(30000, generateToken, 0);
+    glutTimerFunc(20000, generateToken, 0);
   }
 }
 // MAIN
