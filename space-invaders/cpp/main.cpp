@@ -480,10 +480,11 @@ vector<Spaceship> initializeOpponents(int opponentsCount){
 
 
 void generateToken(int val) {
+	int sign = rand() % 2;
 	if (!gameOver){
 		int tokenType = rand() % 4;
 		float xCoordinate = rand() % 7;
-		Token token(true, tokenType, xCoordinate,0,-7);
+		Token token(true, tokenType, (sign == 0)? xCoordinate : -xCoordinate,0,-7);
 		tokens.push_back(token);
 		drawToken(token);
 		glutPostRedisplay();						
