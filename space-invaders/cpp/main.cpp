@@ -82,7 +82,7 @@ const int CAMERA_MODE_ONE = 0;
 const int CAMERA_MODE_TWO = 1;
 const int CAMERA_MODE_THREE = 2;
 bool threeBulletsMode = false;
-bool nukeMode = true;
+bool nukeMode = false;
 // DISPLAY & ANIMATION
 
 void display() {
@@ -167,15 +167,15 @@ void tokenCaptured(Spaceship &spaceship, vector<Token> &tokens){
 			&& spaceshipCoordinates->x - 0.25 < tokenCoordinates->x
 			&& spaceshipCoordinates->x + 0.25 > tokenCoordinates->x && tokens[i].isAirborne){
 				tokens[i].isAirborne = false;
-				enableToken(tokens[i].type);
 				if (tokens[i].type == 0 ||tokens[i].type == 1) {
 					PlaySound("audio/Bell.wav", NULL, SND_ASYNC | SND_FILENAME);
-					enableToken(tokens[i].type);
-					glutTimerFunc(5000, disableToken, tokens[i].type);
-					break;
 				}
 				else 
 					PlaySound("audio/schade.wav", NULL, SND_ASYNC | SND_FILENAME);
+
+				enableToken(tokens[i].type);
+				glutTimerFunc(5000, disableToken, tokens[i].type);
+				break;
 			}		
 	}
 }
@@ -183,12 +183,14 @@ void tokenCaptured(Spaceship &spaceship, vector<Token> &tokens){
 void enableToken(int type){
 	switch(type) {
 		case 0: threeBulletsMode = true; break;
+		case 1: nukeMode = true; break;
 		default: break;
 	}
 }
 void disableToken(int type){
 	switch(type) {
 		case 0: threeBulletsMode = false; break;
+		case 1: nukeMode = false; break;
 		default: break;
 	}
 }
