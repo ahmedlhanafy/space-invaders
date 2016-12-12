@@ -64,7 +64,7 @@ const int WINDOW_POSITION_X = 150;
 const int WINDOW_POSITION_Y = 150;
 
 int opponentsCount = 5;
-int opponentsBulletFiringDelay = 1;
+int opponentsBulletFiringDelay = 10;
 double opponentsSpeed = 0.001;
 
 // VARIABLE CONFIGURATIONS
@@ -177,7 +177,7 @@ void animation() {
 void generateNewWaveOfOpponents() {
   if (opponents.empty()) {
     opponentsCount += 4;
-    opponentsBulletFiringDelay += 1;
+    opponentsBulletFiringDelay += 3;
     opponentsSpeed += 0.003;
     opponents = initializeOpponents(opponentsCount, level);
     level++;
@@ -195,7 +195,7 @@ void drawGameOver() {
   glLoadIdentity();
   glRasterPos2i(WINDOW_WIDTH / 2 - 40, WINDOW_HEIGHT / 2);
   string s = "Game Over";
-  void *font = GLUT_BITMAP_9_BY_15;
+  void *font = GLUT_BITMAP_HELVETICA_18;
   glScaled(200, 200, 200);
   for (string::iterator i = s.begin(); i != s.end(); ++i) {
     char c = *i;
@@ -221,7 +221,7 @@ void drawScoreAndLevel(int score, int level) {
   o << "Score: " << score << " | Level: " << level;
   string s = o.str();
   glScaled(200, 200, 200);
-  void *font = GLUT_BITMAP_9_BY_15;
+  void *font = GLUT_BITMAP_HELVETICA_18;
   for (string::iterator i = s.begin(); i != s.end(); ++i) {
     char c = *i;
     glutBitmapCharacter(font, c);
