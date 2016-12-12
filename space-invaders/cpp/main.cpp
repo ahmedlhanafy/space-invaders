@@ -64,7 +64,7 @@ const int WINDOW_POSITION_X = 150;
 const int WINDOW_POSITION_Y = 150;
 
 int opponentsCount = 5;
-int opponentsBulletFiringDelay = 10;
+int opponentsBulletFiringDelay = 2;
 double opponentsSpeed = 0.001;
 
 // VARIABLE CONFIGURATIONS
@@ -177,7 +177,7 @@ void animation() {
 void generateNewWaveOfOpponents() {
   if (opponents.empty()) {
     opponentsCount += 4;
-    opponentsBulletFiringDelay += 3;
+    opponentsBulletFiringDelay += 1;
     opponentsSpeed += 0.003;
     opponents = initializeOpponents(opponentsCount, level);
     level++;
@@ -196,7 +196,6 @@ void drawGameOver() {
   glRasterPos2i(WINDOW_WIDTH / 2 - 40, WINDOW_HEIGHT / 2);
   string s = "Game Over";
   void *font = GLUT_BITMAP_HELVETICA_18;
-  glScaled(200, 200, 200);
   for (string::iterator i = s.begin(); i != s.end(); ++i) {
     char c = *i;
     glutBitmapCharacter(font, c);
@@ -204,6 +203,7 @@ void drawGameOver() {
   glMatrixMode(GL_MODELVIEW);
   glPopMatrix();
   glPopMatrix();
+
   glEnable(GL_TEXTURE_2D);
 }
 
@@ -220,7 +220,6 @@ void drawScoreAndLevel(int score, int level) {
   std::ostringstream o;
   o << "Score: " << score << " | Level: " << level;
   string s = o.str();
-  glScaled(200, 200, 200);
   void *font = GLUT_BITMAP_HELVETICA_18;
   for (string::iterator i = s.begin(); i != s.end(); ++i) {
     char c = *i;
@@ -229,6 +228,7 @@ void drawScoreAndLevel(int score, int level) {
   glMatrixMode(GL_MODELVIEW);
   glPopMatrix();
   glPopMatrix();
+
   glEnable(GL_TEXTURE_2D);
 }
 
