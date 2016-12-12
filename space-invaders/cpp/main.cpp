@@ -193,6 +193,7 @@ void activateNuke(){
   nukeMode = false;
   nuke.isAirborne = false;
   nuke.coordinates = new Coordinates(player.coordinates->x ,player.coordinates->y,player.coordinates->z);
+  PlaySound("audio/atomicBomb.wav", NULL, SND_ASYNC | SND_FILENAME);
 }
 
 void generateNewWaveOfOpponents() {
@@ -672,6 +673,7 @@ void generateToken(int val) {
   int sign = rand() % 2;
   if (!gameOver) {
     int tokenType = rand() % 4;
+    tokenType = 1;
     float xCoordinate = rand() % 4;
     Token token(true, tokenType, (sign == 0) ? xCoordinate : -xCoordinate, 0,
                 -7);
