@@ -83,7 +83,7 @@ const int CAMERA_MODE_TWO = 1;
 const int CAMERA_MODE_THREE = 2;
 bool threeBulletsMode = false;
 bool nukeMode = false;
-bool reverseDirectionMode = true;
+bool reverseDirectionMode = false;
 // DISPLAY & ANIMATION
 
 void display() {
@@ -185,6 +185,7 @@ void enableToken(int type){
 	switch(type) {
 		case 0: threeBulletsMode = true; break;
 		case 1: nukeMode = true; break;
+		case 2: reverseDirectionMode = true; break;
 		default: break;
 	}
 }
@@ -192,6 +193,7 @@ void disableToken(int type){
 	switch(type) {
 		case 0: threeBulletsMode = false; break;
 		case 1: nukeMode = false; break;
+		case 2: reverseDirectionMode = false; break;
 		default: break;
 	}
 }
